@@ -26,7 +26,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         super().__init__()
         random.seed()
         self.turn_count = 0
-        self.name = "Badger Mole"
+        self.name = "Dragon"
         self.all_arena_locations = []
         self.my_side_locations = []
 
@@ -75,11 +75,44 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.all_arena_locations = self.all_valid_map_locations(game_state)
         self.my_side_locations = self.my_side_valid_locations(game_state)
         self.friendly_edge_locations = self.friendly_edge_locations(game_state)
-
+        
+        
+        self.desired_filter_locations = []
+        for i in range(game_state.ARENA_SIZE):
+            if i == game_state.ARENA_SIZE - 3 or i == game_state.ARENA_SIZE - 4:
+                continue
+            self.desired_filter_locations.append([i, game_state.HALF_ARENA - 1])
+        self.desired_filter_locations.sort(key=lambda x: x[0], reverse=True)
+            
+        self.emp_start_location = [2, 11]
+        self.ping_start_location = [12, 2]
+        self.desired_destroyer_locations = [[i, game_state.HALF_ARENA - 2] 
+                                                for i in range(2, game_state.ARENA_SIZE  - 1)
+                                                if i != 23 or i != 24]
+        self.desired_destroyer_locations.sort(key=lambda x: x[0], reverse=True)
         
     def execute_strategy(self, game_state):
-        self.build_random_defences(game_state)
-        self.build_random_attacker(game_state)
+        self.build_filters(game_state)
+        self.build_destructors(game_state)
+        self.place_unit(game_state, EMP, self.emp_start_location)
+        
+        if game_state.number_affordable(PING) > 0:
+            if game_state.can_spawn(PING, self.ping_start_location):
+                    game_state.attempt_spawn(PING, self.ping_start_location)  
+        
+    def place_unit(self, game_state, unit_type, location):
+        if game_state.number_affordable(unit_type) > 0:
+            if game_state.can_spawn(unit_type, location):
+                    game_state.attempt_spawn(unit_type, location)  
+        
+    def build_filters(self, game_state):
+        for loc in self.desired_filter_locations:
+            self.place_unit(game_state, FILTER, loc)
+        
+    def build_destructors(self, game_state):
+        for loc in self.desired_destroyer_locations:
+            self.place_unit(game_state, DESTRUCTOR, loc)
+        
 
     def build_random_defences(self, game_state):
         # Choose a random location on our side and place defense until we run out 
@@ -87,9 +120,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         while (game_state.number_affordable(FILTER) > 0):
             location = random.choice(self.my_side_locations)
             if game_state.can_spawn(FILTER, location):
-                game_state.attempt_spawn(FILTER, location)
-                
-        
+                game_state.attempt_spawn(FILTER, location)   
         
     def build_random_attacker(self, game_state):
         # Choose a random location on our side and place attack until we run out 
