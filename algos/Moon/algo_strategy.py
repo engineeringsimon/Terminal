@@ -171,11 +171,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         for i in range(3):
             if (self.num_encryp_plus_destruct % 3) == 2:
                 loc = self.calculate_best_encryptor_loc(game_state)
-                gamelib.debug_write("Encryptor => {}".format(loc))
+                #gamelib.debug_write("Encryptor => {}".format(loc))
                 isOk = self.place_defence_unit(game_state, ENCRYPTOR, loc)
             else:
                 loc = self.calculate_best_destructor_loc(game_state)
-                gamelib.debug_write("Destructor => {}".format(loc))
+                #gamelib.debug_write("Destructor => {}".format(loc))
                 isOk = self.place_defence_unit(game_state, DESTRUCTOR, loc)
                 
             if isOk:
@@ -208,15 +208,31 @@ class AlgoStrategy(gamelib.AlgoCore):
         x = location[0]
         y = location[1]
         
-        front = 10 * y
-        right = 5 * x
+        FRONT = 0
+        RIGHT = 1
+        TOO_CLOSE = 2
+        GAP_PATH = 3
+        NO_GAP = 4
+        ENEMY_DAMAGE = 5
+        
+        ws ={
+                FRONT: 1,
+                RIGHT: 1,
+                TOO_CLOSE: 0,
+                GAP_PATH: 1,
+                NO_GAP: 1,
+                ENEMY_DAMAGE: 0
+                }
+        
+        front = y
+        right = x
         
         too_close = 0
         
         filters_above = [1 for a in self.desired_filter_locations if a[0] == x and a[1] > y ]
         
         if len(filters_above):
-            too_close = -1000
+            too_close = -1
         
         
         # get all the points within range of this destructor
@@ -225,7 +241,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         no_gap_penalty = 0
         if num_gap_path_covered == 0:
-            no_gap_penalty = -10000
+            no_gap_penalty = -1
 
         nearby_units =[]
         for x in loc_in_range:
@@ -237,7 +253,13 @@ class AlgoStrategy(gamelib.AlgoCore):
 #        num_friendly = len(friendly_damages)
 #        num_enemy = len(enemy_damages)
         
-        goodness = front + right + too_close + 50 * num_gap_path_covered + 1 * sum(enemy_damages) + no_gap_penalty
+        goodness =   ( ws[FRONT] * front 
+                    + ws[RIGHT] * right 
+                    + ws[TOO_CLOSE] * too_close 
+                    + ws[GAP_PATH] * num_gap_path_covered 
+                    + ws[ENEMY_DAMAGE] * sum(enemy_damages) 
+                    + ws[NO_GAP] * no_gap_penalty
+                    )
         
         #gamelib.debug_write("{}: {} + {} - {} = {}".format(location, front, too_close, num_attackers, goodness))
         return goodness
@@ -251,24 +273,31 @@ class AlgoStrategy(gamelib.AlgoCore):
         ALREADY_COVERED = 2
         FRIENDLY_DAMAGE = 3
         ENEMY_DAMAGE = 4
+        NUM_FRIENDLY = 5
         
-        ws = [5, 100, 2, 5, 2]
+        ws = {
+                FRONT: 1, 
+                TOO_CLOSE: 1, 
+                ALREADY_COVERED: 1, 
+                FRIENDLY_DAMAGE: 1, 
+                ENEMY_DAMAGE: 1, 
+                NUM_FRIENDLY: 1
+                }
         
-        front = ws[FRONT] * y
+        front = y
         
-        too_close = 0
+        too_close = 1
         
         filters_above = [1 for a in self.desired_filter_locations if a[0] == x and a[1] > y ]
         
         if len(filters_above) == 0:
-            too_close = -ws[TOO_CLOSE]
-        
+            too_close = -1       
         
         # get all the points within range of this destructor
         loc_in_range = game_state.game_map.get_locations_in_range(location, 3.5)
         num_attackers = sum([len(game_state.get_attackers(x, 1)) for x in loc_in_range])
 
-        nearby_units =[]
+        nearby_units = []
         for x in loc_in_range:
             nearby_units += game_state.game_map[x[0], x[1]]
         
@@ -278,11 +307,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         num_friendly = len(friendly_damages)
         num_enemy = len(enemy_damages)
         
-        goodness = (front + too_close 
+        goodness = (  ws[FRONT]           * front 
+                    + ws[TOO_CLOSE]       * too_close 
                     - ws[ALREADY_COVERED] * num_attackers 
-                    + num_friendly 
+                    + ws[NUM_FRIENDLY]    * num_friendly 
                     + ws[FRIENDLY_DAMAGE] * sum(friendly_damages)
-                    + ws[ENEMY_DAMAGE] * sum(enemy_damages)
+                    + ws[ENEMY_DAMAGE]    * sum(enemy_damages)
                     )
         
         #gamelib.debug_write("{}: fd{}, nf{}, g{}".format(location, sum(friendly_damages), num_friendly, goodness))
