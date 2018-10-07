@@ -84,26 +84,34 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.desired_filter_locations.append([i, game_state.HALF_ARENA - 1])
         self.desired_filter_locations.sort(key=lambda x: x[0], reverse=True)
             
-        self.emp_start_location = [2, 11]
-        self.ping_start_location = [12, 2]
+        self.emp_start_location = [3, 10]
+        self.ping_start_location = [11, 2]
         self.desired_destroyer_locations = [[i, game_state.HALF_ARENA - 2] 
                                                 for i in range(2, game_state.ARENA_SIZE  - 1)
-                                                if i != 23 or i != 24]
+                                                if i != 23 and i != 24]
         self.desired_destroyer_locations.sort(key=lambda x: x[0], reverse=True)
+
         
     def execute_strategy(self, game_state):
         self.build_filters(game_state)
         self.build_destructors(game_state)
-        self.place_unit(game_state, EMP, self.emp_start_location)
         
-        if game_state.number_affordable(PING) > 0:
-            if game_state.can_spawn(PING, self.ping_start_location):
-                    game_state.attempt_spawn(PING, self.ping_start_location)  
+        self.place_unit(game_state, EMP, self.emp_start_location, 4)
+        self.place_unit(game_state, PING, self.ping_start_location, 100) 
+
         
-    def place_unit(self, game_state, unit_type, location):
-        if game_state.number_affordable(unit_type) > 0:
-            if game_state.can_spawn(unit_type, location):
+    def place_unit(self, game_state, unit_type, location, num=1):
+        number_placed = 0
+        while number_placed < num:
+            if game_state.number_affordable(unit_type) > 0:
+                if game_state.can_spawn(unit_type, location):
                     game_state.attempt_spawn(unit_type, location)  
+                    number_placed += 1
+                else:
+                    return
+            else:
+                return
+                    
         
     def build_filters(self, game_state):
         for loc in self.desired_filter_locations:
@@ -111,8 +119,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         
     def build_destructors(self, game_state):
         for loc in self.desired_destroyer_locations:
-            self.place_unit(game_state, DESTRUCTOR, loc)
-        
+            if loc[0] <= 20 and (loc[0] % 2) == 0:
+                self.place_unit(game_state, ENCRYPTOR, loc)
+            else:
+                self.place_unit(game_state, DESTRUCTOR, loc)
 
     def build_random_defences(self, game_state):
         # Choose a random location on our side and place defense until we run out 
