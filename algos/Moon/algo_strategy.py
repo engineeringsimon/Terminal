@@ -31,6 +31,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.my_side_locations = []
         self.placed_units = []
         self.added_stability = {}
+        self.num_encryp_plus_destruct = 0
 
     def on_game_start(self, config):
         """ 
@@ -116,8 +117,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             
         
     def execute_strategy(self, game_state):
-        self.build_filters(game_state)
         self.build_destructors(game_state)
+        self.build_filters(game_state)
         
         self.place_unit_random_edge(game_state, EMP, 4)
         self.place_unit_random_edge(game_state, SCRAMBLER, 100) 
@@ -167,8 +168,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.place_defence_unit(game_state, FILTER, loc)
         
     def build_destructors(self, game_state):
-        for i in range(10):
-            if False: #(i%3) == 2:
+        for i in range(3):
+            if (self.num_encryp_plus_destruct % 3) == 2:
                 loc = self.calculate_best_encryptor_loc(game_state)
                 gamelib.debug_write("Encryptor => {}".format(loc))
                 isOk = self.place_defence_unit(game_state, ENCRYPTOR, loc)
@@ -179,6 +180,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                 
             if isOk:
                 self.placed_units.append(loc)
+                self.num_encryp_plus_destruct += 1
             else:
                 break
             
@@ -206,31 +208,36 @@ class AlgoStrategy(gamelib.AlgoCore):
         x = location[0]
         y = location[1]
         
-#        front = 5 * y
-#        
-#        too_close = 0
-#        
-#        filters_above = [1 for a in self.desired_filter_locations if a[0] == x and a[1] > y ]
-#        
-#        if len(filters_above):
-#            too_close = -100
+        front = 10 * y
+        right = 5 * x
+        
+        too_close = 0
+        
+        filters_above = [1 for a in self.desired_filter_locations if a[0] == x and a[1] > y ]
+        
+        if len(filters_above):
+            too_close = -1000
         
         
         # get all the points within range of this destructor
         loc_in_range = game_state.game_map.get_locations_in_range(location, 3.5)
         num_gap_path_covered = len([1 for x in loc_in_range if x in self.gap_path])
+        
+        no_gap_penalty = 0
+        if num_gap_path_covered == 0:
+            no_gap_penalty = -10000
 
-#        nearby_units =[]
-#        for x in loc_in_range:
-#            nearby_units += game_state.game_map[x[0], x[1]]
+        nearby_units =[]
+        for x in loc_in_range:
+            nearby_units += game_state.game_map[x[0], x[1]]
 #        
 #        friendly_damages = [x.max_stability - x.stability for x in nearby_units if x.player_index == 0]
-#        enemy_damages = [x.max_stability - x.stability for x in nearby_units if x.player_index == 1]
+        enemy_damages = [x.max_stability - x.stability for x in nearby_units if x.player_index == 1]
 #        
 #        num_friendly = len(friendly_damages)
 #        num_enemy = len(enemy_damages)
         
-        goodness = num_gap_path_covered
+        goodness = front + right + too_close + 50 * num_gap_path_covered + 1 * sum(enemy_damages) + no_gap_penalty
         
         #gamelib.debug_write("{}: {} + {} - {} = {}".format(location, front, too_close, num_attackers, goodness))
         return goodness
@@ -303,6 +310,15 @@ class AlgoStrategy(gamelib.AlgoCore):
         return locations
     
     def print_map(self, game_state):
+        unit_character = {
+                PING: 'P',
+                EMP: 'X',
+                SCRAMBLER: 'S',
+                FILTER: 'F',
+                DESTRUCTOR: "D",
+                ENCRYPTOR: "E"
+                }
+        
         gm = game_state.game_map
         for j in range(game_state.ARENA_SIZE):
             row = ":"
@@ -314,7 +330,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                 if not a or len(a) == 0:
                     row += ". "
                 else: 
-                    character = a[0].unit_type[0]
+                    character = unit_character[a[0].unit_type]
                     if a[0].player_index == 1:
                         character = character.lower()
                     row += character + " "
