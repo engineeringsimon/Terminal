@@ -276,12 +276,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         NUM_FRIENDLY = 5
         
         ws = {
-                FRONT: 1, 
-                TOO_CLOSE: 1, 
-                ALREADY_COVERED: 1, 
+                FRONT: 0, 
+                TOO_CLOSE: 0, 
+                ALREADY_COVERED: 10, 
                 FRIENDLY_DAMAGE: 1, 
-                ENEMY_DAMAGE: 1, 
-                NUM_FRIENDLY: 1
+                ENEMY_DAMAGE: 0, 
+                NUM_FRIENDLY: 0
                 }
         
         front = y
