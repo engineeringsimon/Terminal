@@ -102,7 +102,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                 self.desired_filter_locations.append(location)
         self.desired_filter_locations.reverse()
         
-        self.emp_start_location = [5,8]
+        self.emp_start_location = [13,0]
         self.desired_destroyer_locations = [[x[0], x[1] - 1] 
                             for x in self.desired_filter_locations 
                             if game_state.game_map.in_arena_bounds([x[0], x[1] - 1])]
@@ -117,10 +117,10 @@ class AlgoStrategy(gamelib.AlgoCore):
             
         
     def execute_strategy(self, game_state):
+        #self.build_filters(game_state)
         self.build_destructors(game_state)
-        self.build_filters(game_state)
         
-        self.place_unit_random_edge(game_state, EMP, 4)
+        self.place_unit(game_state, EMP, self.emp_start_location, 4)
         self.place_unit_random_edge(game_state, SCRAMBLER, 100) 
         
     def place_defence_unit(self, game_state, unit_type, location, num=1):
@@ -276,10 +276,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         NUM_FRIENDLY = 5
         
         ws = {
-                FRONT: 0, 
+                FRONT: 1, 
                 TOO_CLOSE: 0, 
-                ALREADY_COVERED: 10, 
-                FRIENDLY_DAMAGE: 1, 
+                ALREADY_COVERED: 8, 
+                FRIENDLY_DAMAGE: 10, 
                 ENEMY_DAMAGE: 0, 
                 NUM_FRIENDLY: 0
                 }

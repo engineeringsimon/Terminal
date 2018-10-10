@@ -1,0 +1,103 @@
+---------------- Starting Your Algo --------------------
+Configuring Moon...
+Performing turn 0 of the Moon strategy
+:                          . .
+:                        . . . .
+:                      . . . . . .
+:                    . . . . . . . .
+:                  . . . . . . . . . .
+:                . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:        . . . . . . . . . . . . . . . . . . . .
+:      . . . . . . . . . . . . . . . . . . . . . .
+:    . . . . . . . . . . . . . . . . . . . . . . . .
+:  . . . . . . . . . . . . . . . . . . . . . . . . . .
+:. . . . . . . . . . . . . . . . . . . . . . . . . . . .
+:D . . . . . . . D . . . . . . . . . . . . . . . . . . .
+:  . . . . . . . . . . . . . . . . . . . . . . . E . .
+:    . . . . . . . . . . . . . . . . . . . . . . . .
+:      S . . . . . . . . . . . . . . . . . . . . .
+:        . . . . . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:                S . . . . . . . . . . .
+:                  . . . . . . . . . .
+:                    . . . . . . . .
+:                      . . . . . .
+:                        . . . .
+:                          X .
+Performing turn 1 of the Moon strategy
+:                          . .
+:                        . . . .
+:                      . . . . . .
+:                    . . . . . . . .
+:                  . . . . . . . . . .
+:                . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:        . . . . . . . . . . . . . . . . . . . .
+:      . . . . . . . . . . . . . . . . . . . . . .
+:    . . . . . . . . . . . . . . . . . . . . . . . .
+:  . . . . . . . . . . . . . . . . . . . . . . . . . .
+:f f . . f f f f f f f f f f f f f f f f f f f f f f f .
+:D . . . . . . . D . . . . . . . . . . . . D . . . D . .
+:  . . . . . . . . . . . . . . . . . . . . . . . E . S
+:    . . . . . . . . . . . . . . . . . . . . . . . .
+:      . . . . . . . . . . . . . . . . . . . . . S
+:        . . . . . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:                . . . . . . . . . . . .
+:                  . . . . . . . . . .
+:                    . . . . . . . .
+:                      . . . . . .
+:                        . . . .
+:                          X .
+Performing turn 2 of the Moon strategy
+:                          . .
+:                        . . . .
+:                      . . . . . .
+:                    . . . . . . . .
+:                  . . . . . . . . . .
+:                . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:        . . . . . . . . . . . . . . . . . . . .
+:      . . . . . . . . . . . . . . . . . . . . . .
+:    . . . . . . . . . . . . . . . . . . . . . . . .
+:  d . . . . . . . . . . . . . . . . . . . . . . . . .
+:f f . . . . f f f f f f f f f f f f f f f f f f f f f f
+:D . . . . . . . D . . . D . . . . . . . . D . . . D . .
+:  . . . . . . . . . . . . . . . . . . . . . . . E . .
+:    . . . . . . . . . . . . . . . . . . . . . E . .
+:      . . . . . . . . . . . . . . . . . . D . . .
+:        . . . . . . . . . . . . . . . . . . . .
+:          . . . . . . . . . . . . . . . . . .
+:            . . . . . . . . . . . . . . . .
+:              . . . . . . . . . . . . . .
+:                . . . . . . . . . . . .
+:                  . . . . . . . . . .
+:                    S . . . . . . .
+:                      . . . . . .
+:                        . . . S
+:                          X .
+Traceback (most recent call last):
+  File "C:\Users\engin\Documents\git\Terminal\algos\Moon\algo_strategy.py", line 390, in <module>
+    algo.start()
+  File "C:\Users\engin\Documents\git\Terminal\algos\Moon\gamelib\algocore.py", line 61, in start
+    self.on_turn(game_state_string)
+  File "C:\Users\engin\Documents\git\Terminal\algos\Moon\algo_strategy.py", line 80, in on_turn
+    game_state.submit_turn()
+  File "C:\Users\engin\Documents\git\Terminal\algos\Moon\gamelib\game_state.py", line 158, in submit_turn
+    send_command(build_string)
+  File "C:\Users\engin\Documents\git\Terminal\algos\Moon\gamelib\util.py", line 30, in send_command
+    sys.stdout.flush()
+OSError: [Errno 22] Invalid argument
+Exception ignored in: <_io.TextIOWrapper name='<stdout>' mode='w' encoding='cp1252'>
+OSError: [Errno 22] Invalid argument
