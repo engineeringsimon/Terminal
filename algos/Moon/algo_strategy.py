@@ -32,12 +32,17 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.placed_units = []
         self.added_stability = {}
         self.num_encryp_plus_destruct = 0
+        self.is_printing_debug = False
+        
+    def debug_print(self, str):
+        if self.is_printing_debug:
+            gamelib.debug_write(str)
 
     def on_game_start(self, config):
         """ 
         Read in config and perform any initial setup here 
         """
-        gamelib.debug_write('Configuring {}...'.format(self.name))
+        self.debug_print('Configuring {}...'.format(self.name))
         self.config = config
         global FILTER, ENCRYPTOR, DESTRUCTOR, PING, EMP, SCRAMBLER
         FILTER = config["unitInformation"][0]["shorthand"]
@@ -66,7 +71,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         """
         self.placed_units = []
         game_state = gamelib.AdvancedGameState(self.config, turn_state)
-        gamelib.debug_write('Performing turn {} of the {} strategy'.format(game_state.turn_number, 
+        self.debug_print('Performing turn {} of the {} strategy'.format(game_state.turn_number, 
                                 self.name))
         #game_state.suppress_warnings(True)  #Uncomment this line to suppress warnings.
 
@@ -171,11 +176,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         for i in range(3):
             if (self.num_encryp_plus_destruct % 3) == 2:
                 loc = self.calculate_best_encryptor_loc(game_state)
-                #gamelib.debug_write("Encryptor => {}".format(loc))
+                #self.debug_print("Encryptor => {}".format(loc))
                 isOk = self.place_defence_unit(game_state, ENCRYPTOR, loc)
             else:
                 loc = self.calculate_best_destructor_loc(game_state)
-                #gamelib.debug_write("Destructor => {}".format(loc))
+                #self.debug_print("Destructor => {}".format(loc))
                 isOk = self.place_defence_unit(game_state, DESTRUCTOR, loc)
                 
             if isOk:
@@ -261,7 +266,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                     + ws[NO_GAP] * no_gap_penalty
                     )
         
-        #gamelib.debug_write("{}: {} + {} - {} = {}".format(location, front, too_close, num_attackers, goodness))
+        #self.debug_print("{}: {} + {} - {} = {}".format(location, front, too_close, num_attackers, goodness))
         return goodness
 
     def destructor_goodness(self, game_state, location):
@@ -315,7 +320,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                     + ws[ENEMY_DAMAGE]    * sum(enemy_damages)
                     )
         
-        #gamelib.debug_write("{}: fd{}, nf{}, g{}".format(location, sum(friendly_damages), num_friendly, goodness))
+        #self.debug_print("{}: fd{}, nf{}, g{}".format(location, sum(friendly_damages), num_friendly, goodness))
         return goodness
     
     def all_valid_map_locations(self, game_state):
@@ -364,7 +369,7 @@ class AlgoStrategy(gamelib.AlgoCore):
                     if a[0].player_index == 1:
                         character = character.lower()
                     row += character + " "
-            gamelib.debug_write(row)
+            self.debug_print(row)
     
     def register_new_unit(self, location, stability):
         x = location[0]
