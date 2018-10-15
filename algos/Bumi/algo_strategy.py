@@ -412,8 +412,6 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.attack_paths.append((self.left_attack_launch_loc, l_r_path))
             self.attack_paths.append((self.right_attack_launch_loc, r_l_path))
             
-        self.best_attack_index_log = []
-            
     def left_to_right_attack_path(self, offset):
         line0 = [(x, x - 13 + offset) for x in range(self.game_state.game_map.ARENA_SIZE)]
         line1 = [(x, x - 14 + offset) for x in range(self.game_state.game_map.ARENA_SIZE)]
@@ -473,12 +471,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             (in_range_count, is_successful) = self.eval_friendly_path(path)
             self.attack_path_damage[i] = in_range_count
             
-        self.best_attack_index_log.append(min(self.attack_path_damage, key=lambda i: self.attack_path_damage[i]))
-        if len(self.best_attack_index_log) < 3:
-            self.min_attack_path_index = self.best_attack_index_log[-1]
-        elif self.best_attack_index_log[-1] == self.best_attack_index_log[-2]:# and self.best_attack_index_log[-1] == self.best_attack_index_log[-3]:
-            self.min_attack_path_index = self.best_attack_index_log[-1] # change if the last 3 were the same
-            
+        self.min_attack_path_index = min(self.attack_path_damage, key=lambda i: self.attack_path_damage[i])
         self.debug_print("Attack Damage = {}".format(self.attack_path_damage))
         
     def update_enemy_emp_coverage(self):
@@ -543,52 +536,27 @@ class AlgoStrategy(gamelib.AlgoCore):
         return (num_in_range_points, is_successful)
         
     def place_attackers(self):
-        # my_health = self.game_state.my_health
-        # enemy_health = self.game_state.enemy_health
-        # if (my_health < 20.0 and enemy_health > my_health) or (enemy_health - my_health) > 6.0:
-            # self.tweaked_place_attackers()
-            # return
+        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
+        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
+        num_affordable_emp = self.game_state.number_affordable(EMP)
+        
+        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
+        if len(edge_points) > 0:
+            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
+        else:
+            attack_start = start_loc
             
-        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
-        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
-        num_affordable_emp = self.game_state.number_affordable(EMP)
-        
-        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
-        if len(edge_points) > 0:
-            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
-        else:
+        if self.game_state.turn_number >= 10:
             attack_start = start_loc
         
         if num_in_range_points <= 3:
             self.place_unit(PING, attack_start, 100)
-        elif num_in_range_points < 30 and num_affordable_emp >= 2:
+        elif num_in_range_points < 20 and num_affordable_emp >= 2:
             self.place_unit(EMP, attack_start, 100)
-        elif num_in_range_points < 60 and num_affordable_emp >= 4:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_affordable_emp >= 5:
-            self.place_unit(EMP, attack_start, 100)
-
-    def tweaked_place_attackers(self):
-        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
-        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
-        num_affordable_emp = self.game_state.number_affordable(EMP)
-        
-        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
-        if len(edge_points) > 0:
-            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
-        else:
-            attack_start = start_loc
-        attack_start = start_loc
-        if num_in_range_points <= 3:
-            n = self.game_state.number_affordable(PING)
-            self.place_unit(PING, attack_start, 100)
-        elif num_in_range_points < 30 and num_affordable_emp >= 2:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_in_range_points < 60 and num_affordable_emp >= 4:
+        elif num_in_range_points < 40 and num_affordable_emp >= 4:
             self.place_unit(EMP, attack_start, 100)
         elif num_affordable_emp >= 5:
             self.place_unit(EMP, attack_start, 100)
-
 
     
     def old_place_attackers(self):
