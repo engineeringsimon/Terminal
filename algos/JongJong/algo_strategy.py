@@ -542,6 +542,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         return locations
     
     def print_map(self):
+        return
         unit_character = {
                 PING: 'P',
                 EMP: 'X',

@@ -175,15 +175,15 @@ FFF.....................FD..
 
 # Bumi
 bumi_layout = '''
-FFF......................FFF
- DFF....................FFD 
-  ...D................D... 
-   .....D..........D..... 
-    .......D....D....... 
-     .................. 
-      ................ 
-       S............S 
-        ............ 
+FFF......G........G......FFF
+ DFF.....G........G.....FFD 
+  ...D...G........G...D... 
+   ..E..DG........GD..E.. 
+    ....EG.D....D.GE.... 
+     ....G.E....E.G.... 
+      GGGG........GGGG 
+       SGG........GGS 
+        GG........GG 
          .......... 
           ........ 
            ...... 
@@ -193,17 +193,53 @@ FFF......................FFF
 
 # Bumi2
 bumi2_layout = '''
-F........................F..
- F......................F.. 
-  F....................F.. 
-   F..................F.. 
-    F................F.. 
-     F..............F.. 
-      F............F.. 
-       F..........F.. 
-        FDDDDD...F.. 
-         .......F.. 
-          FFFFFF.. 
+FFF..........G...........FFF
+ FFF.........G..........FFF 
+  FF........EG..........FF 
+   .........EG........... 
+    ..E..E..EG..E..E..E. 
+     .......EG......... 
+      .......G........ 
+       ......G....... 
+        .....G...... 
+         ....G..... 
+          GGGGGGGG 
+           ...... 
+            .... 
+             .. 
+''' 
+
+# Bumi3
+bumi3_layout = '''
+FF...........G............FF
+ FF..........G...........FF 
+  FF.........G..........FF 
+   ...D..D..DGD..D..D.... 
+    ..E..E..EGE..E..E... 
+     ........G......... 
+      .......G........ 
+       ......G....... 
+        .....G...... 
+         ....G..... 
+          GGGGGGGG 
+           ...... 
+            .... 
+             .. 
+''' 
+
+# Bumi3
+adaptive_wall_layout = '''
+FFF......................FFF
+ .FFF..................FFF. 
+  .DFF................FFD. 
+   ..EFFFFFFFFFFFFFFFFE.. 
+    ..E.E.E.E.E.E.E.E... 
+     .................. 
+      ................ 
+       .............. 
+        ............ 
+         .......... 
+          ........ 
            ...... 
             .... 
              .. 
@@ -240,7 +276,7 @@ test_layout = '''
 '''
 
    
-desired_layout = bumi2_layout   
+desired_layout = adaptive_wall_layout   
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -291,8 +327,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.friendly_destructor_coverage = PointHistogram()
         self.enemy_emp_coverage = PointHistogram()
         self.enemy_path_hist = PointHistogram()
-        self.friendly_path_hist = PointHistogram()
-        
+        self.friendly_path_hist = PointHistogram()        
         
     def on_turn(self, turn_state):
         """
@@ -344,6 +379,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.emp_range_points[x, y] = self.game_state.game_map.get_locations_in_range((x, y), 4.5)
 
         # covert layout string to layout
+        self.gap = []
         i = 0
         lines = self.desired_layout_string.split("\n")[1:]
         for line in lines:
@@ -354,27 +390,96 @@ class AlgoStrategy(gamelib.AlgoCore):
             x = loc[0]
             y = loc[1]
             character = lines[self.game_state.HALF_ARENA - 1 - y][x]
+            if character == "G":
+                self.gap.append(loc)
+                continue
             if character in self.my_unit_code:
                 self.desired_layout[x, y] = self.my_unit_code[character]
         
         self.enemy_edges = self.game_state.game_map.get_edge_locations(self.game_state.game_map.TOP_RIGHT) + self.game_state.game_map.get_edge_locations(self.game_state.game_map.TOP_LEFT)
+            
+        # initialise the test attack paths
+        # a test attack path is a combination of launch location (one for left other for right)
+        # (launch location, [list of points on path]) i.e. ([x,y], [[x0,y0], [x1,y1], ... , [xn, yn]])
+        self.attack_paths = []
+        # left to right
+        # for a in [0..26]
+        self.left_attack_launch_loc = [4, 9]
+        self.right_attack_launch_loc = self.mirror(self.left_attack_launch_loc)
+        for a in [0, 5, 10, 16, 22, 27]:
+            l_r_path = self.left_to_right_attack_path(a)
+            r_l_path = self.right_to_left_attack_path(a)
+            self.attack_paths.append((self.left_attack_launch_loc, l_r_path))
+            self.attack_paths.append((self.right_attack_launch_loc, r_l_path))
+            
+        self.best_attack_index_log = []
+            
+    def left_to_right_attack_path(self, offset):
+        line0 = [(x, x - 13 + offset) for x in range(self.game_state.game_map.ARENA_SIZE)]
+        line1 = [(x, x - 14 + offset) for x in range(self.game_state.game_map.ARENA_SIZE)]
+        lines = line0 + line1
+        path = [(x, y) for (x, y) in lines if (x + y) >= 13 and (x + y) <= 41]
+        #self.debug_print("LR {}: {}".format(offset, path))
+        return path
+            
+    def right_to_left_attack_path(self, offset):
+        line0 = [(x, 13 + offset - x) for x in range(self.game_state.game_map.ARENA_SIZE)]
+        line1 = [(x, 14 + offset - x) for x in range(self.game_state.game_map.ARENA_SIZE)]
+        lines = line0 + line1
+        path = [(x, y) for (x, y) in lines if (y - x) >= -14 and (y - x) <= 14]
+        return path
+            
         
-        self.gap = []
-        for i in range(self.game_state.game_map.HALF_ARENA):
-            self.gap.append([i + self.game_state.game_map.HALF_ARENA - 1, i])
-            self.gap.append([i + self.game_state.game_map.HALF_ARENA, i])
+    def mirror(self, loc):
+        x = loc[0]
+        y = loc[1]
+        mirror_x = self.game_state.game_map.ARENA_SIZE - 1 - x
+        return [mirror_x, y]
         
     def execute_strategy(self):
         self.update_field_calcs()
+        self.update_gap_from_attack_paths()
+        self.remove_gap_defenses()
         self.build_defences()
         self.place_destructors()
         self.place_attackers()
+    
+    def remove_gap_defenses(self):
+        for loc in self.gap:
+            x = loc[0]
+            y = loc[1]
+            if y >= self.game_state.game_map.HALF_ARENA:
+                continue
+            if self.game_state.contains_stationary_unit(loc):
+                self.game_state.attempt_remove(loc)
+    
+    def update_gap_from_attack_paths(self):
+        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
+        self.gap = [[x, y] for (x, y) in attack_path]
+        
         
     def update_field_calcs(self):
         self.update_destructor_coverage()
         self.update_enemy_paths()
         self.update_friendly_paths()
         self.update_enemy_emp_coverage()
+        self.update_attack_path_damage()
+        
+    def update_attack_path_damage(self):
+        self.attack_path_damage = {}
+        n = len(self.attack_paths)
+        for i in range(n):
+            (launch_loc, path) = self.attack_paths[i]
+            (in_range_count, is_successful) = self.eval_friendly_path(path)
+            self.attack_path_damage[i] = in_range_count
+            
+        self.best_attack_index_log.append(min(self.attack_path_damage, key=lambda i: self.attack_path_damage[i]))
+        if len(self.best_attack_index_log) < 3:
+            self.min_attack_path_index = self.best_attack_index_log[-1]
+        elif self.best_attack_index_log[-1] == self.best_attack_index_log[-2]:# and self.best_attack_index_log[-1] == self.best_attack_index_log[-3]:
+            self.min_attack_path_index = self.best_attack_index_log[-1] # change if the last 3 were the same
+            
+        self.debug_print("Attack Damage = {}".format(self.attack_path_damage))
         
     def update_enemy_emp_coverage(self):
         self.enemy_emp_coverage = PointHistogram()
@@ -417,13 +522,16 @@ class AlgoStrategy(gamelib.AlgoCore):
                     else:
                         self.enemy_destructor_coverage.add((x[0], x[1]), 1)
     
-    def place_destructors(self):
+    def place_destructors(self, max_num=100):
         potential_locations = self.enemy_path_hist.sorted_keys()
         destructor_points = [x for x in potential_locations if [x[0], x[1]] in self.my_side and [x[0], x[1]] not in self.gap]
-
+        count = 0
         for loc in destructor_points:
             isOk = self.place_unit(DESTRUCTOR, loc)
             if not isOk:
+                break
+            count += 1
+            if count >= max_num:
                 break
     
     def eval_friendly_path(self, path):
@@ -433,24 +541,74 @@ class AlgoStrategy(gamelib.AlgoCore):
 
         is_successful = path[-1] in self.enemy_edges
         return (num_in_range_points, is_successful)
-    
+        
     def place_attackers(self):
+        # my_health = self.game_state.my_health
+        # enemy_health = self.game_state.enemy_health
+        # if (my_health < 20.0 and enemy_health > my_health) or (enemy_health - my_health) > 6.0:
+            # self.tweaked_place_attackers()
+            # return
+            
+        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
+        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
+        num_affordable_emp = self.game_state.number_affordable(EMP)
+        
+        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
+        if len(edge_points) > 0:
+            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
+        else:
+            attack_start = start_loc
+        
+        if num_in_range_points <= 3:
+            self.place_unit(PING, attack_start, 100)
+        elif num_in_range_points < 30 and num_affordable_emp >= 2:
+            self.place_unit(EMP, attack_start, 100)
+        elif num_in_range_points < 60 and num_affordable_emp >= 4:
+            self.place_unit(EMP, attack_start, 100)
+        elif num_affordable_emp >= 5:
+            self.place_unit(EMP, attack_start, 100)
+
+    def tweaked_place_attackers(self):
+        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
+        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
+        num_affordable_emp = self.game_state.number_affordable(EMP)
+        
+        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
+        if len(edge_points) > 0:
+            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
+        else:
+            attack_start = start_loc
+        attack_start = start_loc
+        if num_in_range_points <= 3:
+            n = self.game_state.number_affordable(PING)
+            self.place_unit(PING, attack_start, 100)
+        elif num_in_range_points < 30 and num_affordable_emp >= 2:
+            self.place_unit(EMP, attack_start, 100)
+        elif num_in_range_points < 60 and num_affordable_emp >= 4:
+            self.place_unit(EMP, attack_start, 100)
+        elif num_affordable_emp >= 5:
+            self.place_unit(EMP, attack_start, 100)
+
+
+    
+    def old_place_attackers(self):
         path_info = [(self.eval_friendly_path(x), x[0]) for x in self.friendly_paths]
         path_info.sort(key=lambda x: x[0][0])
         num_in_range_points = path_info[0][0][0]
         is_successful = path_info[0][0][1]
         loc = path_info[0][1]
         
+        current_bits = self.game_state.get_resource(self.game_state.BITS, 0)
+        num_affordable_emp = self.game_state.number_affordable(EMP)
+        
         if num_in_range_points <= 2 and is_successful:
             self.place_unit(PING, loc, 100)
-            #self.debug_print("PING!")
-        elif num_in_range_points > 60 and is_successful:
-            self.place_unit(SCRAMBLER, loc, 2)
+        elif num_in_range_points < 30 and num_affordable_emp >= 2:
             self.place_unit(EMP, loc, 100)
-            #self.debug_print("SCRAMBLER! etc.")
-        else:
+        elif num_in_range_points < 60 and num_affordable_emp >= 4:
             self.place_unit(EMP, loc, 100)
-            #self.debug_print("EMP!")
+        elif num_affordable_emp >= 5:
+            self.place_unit(EMP, loc, 100)
         
     def enemy_destructor_locations(self):
         locations = []
@@ -480,7 +638,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         if len(locations) == 0:
             return [13, 0]
         (x, y) = random.choice(locations)
-        self.debug_print("choosing {}, from {}".format((x,y), locations))
         return [x, y]
 
     def available_launch_locations(self):
@@ -491,7 +648,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         return random.choice(locations)
         
     def build_defences(self):
-        locations = [loc for loc in self.desired_layout if not self.game_state.contains_stationary_unit(loc)]
+        locations = [(x, y) for (x, y) in self.desired_layout 
+                         if not self.game_state.contains_stationary_unit((x, y)) 
+                            and [x, y] not in self.gap]
+        #self.debug_print("Build defences loc = {}, gap = {}".format(locations[0], self.gap))
         random.shuffle(locations)
         locations.sort(key=lambda x: x[1], reverse=True)
         for loc in locations:
@@ -585,7 +745,12 @@ class AlgoStrategy(gamelib.AlgoCore):
                     continue
                 a = gm[x, y]
                 if not a or len(a) == 0:
-                    if self.enemy_path_hist.value((x, y)) > 0:
+                    # num_attack_paths = len(self.attack_paths)
+                    # path_index = self.game_state.turn_number % num_attack_paths
+                    (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
+                    if (x, y) in attack_path:
+                        row += "a "
+                    elif self.enemy_destructor_coverage.value((x, y)) > 0:
                         row += "_ " #"{} ".format(self.enemy_path_hist.value((x, y)))
                     else:
                         row += ". "
