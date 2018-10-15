@@ -657,8 +657,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         for loc in locations:
             unit_id = self.desired_layout[loc[0], loc[1]]
             if unit_id in [DESTRUCTOR, FILTER, ENCRYPTOR]:  
-                if unit_id == FILTER and self.placement_hist.value((loc[0], loc[1])) > 0:
-                    unit_id = DESTRUCTOR    
+                # if unit_id == FILTER and self.placement_hist.value((loc[0], loc[1])) > 0:
+                    # unit_id = DESTRUCTOR    
                 isOk = self.place_unit(unit_id, loc)
                 if not isOk: 
                     break            
