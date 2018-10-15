@@ -558,7 +558,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
         else:
             attack_start = start_loc
-        
+        attack_start = start_loc
         if num_in_range_points <= 3:
             self.place_unit(PING, attack_start, 100)
         elif num_in_range_points < 30 and num_affordable_emp >= 2:
@@ -588,8 +588,6 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.place_unit(EMP, attack_start, 100)
         elif num_affordable_emp >= 5:
             self.place_unit(EMP, attack_start, 100)
-
-
     
     def old_place_attackers(self):
         path_info = [(self.eval_friendly_path(x), x[0]) for x in self.friendly_paths]
