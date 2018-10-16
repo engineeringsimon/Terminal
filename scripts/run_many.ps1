@@ -1,15 +1,6 @@
 $player = "Bumi"
-$opponents = @(
-                # "starter-algo", 
-                # "BadgerMole", 
-                "Dragon", 
-                "SkyBison", 
-                "Moon", 
-                # "Boulder", 
-                "JongJong", 
-                "Gyatso", 
-                # "Paku"
-                )
+#$opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku")
+$opponents = @("Dragon", "SkyBison", "Moon", "JongJong", "Gyatso")
 $wins = @()
 $numMatches = 2
 
