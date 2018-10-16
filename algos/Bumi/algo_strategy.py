@@ -277,7 +277,7 @@ FFFFFFFFFFFFFFFFFFFFFFFFFFFF
 '''
 
    
-desired_layout = dumb_wall_layout   
+desired_layout = sneak_attack_layout   
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
