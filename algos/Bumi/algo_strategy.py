@@ -245,6 +245,24 @@ F..........................F
              .. 
 ''' 
 
+# Dumb wall
+dumb_wall_layout = '''
+FFFFFFFFFFFFFFFFFFFFFFFFFFFF
+ .......................... 
+  ........................ 
+   ......................
+    .................... 
+     .................. 
+      ................ 
+       .............. 
+        ............ 
+         .......... 
+          ........ 
+           ...... 
+            .... 
+             .. 
+''' 
+
 
 '''
     Idea for stategy:
@@ -259,7 +277,7 @@ F..........................F
 '''
 
    
-desired_layout = adaptive_wall_layout   
+desired_layout = dumb_wall_layout   
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -396,6 +414,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.attack_paths.append((self.right_attack_launch_loc, r_l_path))
             
         self.best_attack_index_log = []
+        self.num_destructors_placed = 0
+        self.num_encrytors_placed = 0
             
     def left_to_right_attack_path(self, offset):
         line0 = [(x, x - 13 + offset) for x in range(self.game_state.game_map.ARENA_SIZE)]
@@ -423,7 +443,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.update_gap_from_attack_paths()
         self.remove_gap_defenses()
         self.build_defences()
-        if (self.game_state.turn_number % 2) < 1:
+        
+        if self.num_encrytors_placed * 2 >= self.num_destructors_placed:
             self.place_destructors()
             self.place_attackers()
         else:
@@ -517,6 +538,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             isOk = self.place_unit(DESTRUCTOR, loc)
             if not isOk:
                 break
+            self.num_destructors_placed += 1
             count += 1
             if count >= max_num:
                 break
@@ -549,6 +571,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             isOk = self.place_unit(ENCRYPTOR, loc)
             if not isOk:
                 break        
+            self.num_encrytors_placed += 1
     
     def eval_friendly_path(self, path):
         num_in_range_points = 0
@@ -570,10 +593,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         num_affordable_emp = self.game_state.number_affordable(EMP)
         
         edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
-        if len(edge_points) > 0:
-            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
-        else:
-            attack_start = start_loc
+        #if len(edge_points) > 0:
+        attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
+        #else:
+        #    attack_start = start_loc
         
         if num_in_range_points <= 3:
             self.place_unit(PING, attack_start, 100)
