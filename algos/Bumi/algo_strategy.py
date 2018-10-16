@@ -423,7 +423,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.update_gap_from_attack_paths()
         self.remove_gap_defenses()
         self.build_defences()
-        if (self.game_state.turn_number % 3) < 2:
+        if (self.game_state.turn_number % 2) < 1:
             self.place_destructors()
             self.place_attackers()
         else:
@@ -530,7 +530,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         # choose rows 8 and 9
         potential_locations = [loc for loc in self.my_side 
-                                    if (loc[1] == 8 or loc[1] == 9) 
+                                    if loc[1] <= 9 
                                         and loc not in self.gap 
                                         and loc not in path]
                                         
@@ -548,12 +548,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         for loc, num_covered in evaluated_points:
             isOk = self.place_unit(ENCRYPTOR, loc)
             if not isOk:
-                break
-
-        
-        
-        
-        
+                break        
     
     def eval_friendly_path(self, path):
         num_in_range_points = 0
