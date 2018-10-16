@@ -423,8 +423,13 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.update_gap_from_attack_paths()
         self.remove_gap_defenses()
         self.build_defences()
-        self.place_destructors()
-        self.place_attackers()
+        if (self.game_state.turn_number % 3) < 2:
+            self.place_destructors()
+            self.place_attackers()
+        else:
+            launch_loc = self.place_attackers()
+            self.place_encryptors(launch_loc)
+        
     
     def remove_gap_defenses(self):
         for loc in self.gap:
@@ -515,6 +520,40 @@ class AlgoStrategy(gamelib.AlgoCore):
             count += 1
             if count >= max_num:
                 break
+                
+    def place_encryptors(self, launch_loc):
+        potential_paths = [path for path in self.friendly_paths if launch_loc in path]
+        if len(potential_paths) == 0:
+            self.place_destructors()
+            
+        path = potential_paths[0]
+        
+        # choose rows 8 and 9
+        potential_locations = [loc for loc in self.my_side 
+                                    if (loc[1] == 8 or loc[1] == 9) 
+                                        and loc not in self.gap 
+                                        and loc not in path]
+                                        
+        evaluated_points = []                                        
+        
+        for loc in potential_locations:
+            x = loc[0]
+            y = loc[1]
+            # calc coverage of encryptor at loc for the path points
+            covered_points = self.destructor_range_points[x, y]
+            covered_path_points = [loc for loc in path if loc in covered_points]
+            evaluated_points.append((loc, len(covered_path_points)))
+            
+        evaluated_points.sort(key=lambda x: x[1], reverse=True)
+        for loc, num_covered in evaluated_points:
+            isOk = self.place_unit(ENCRYPTOR, loc)
+            if not isOk:
+                break
+
+        
+        
+        
+        
     
     def eval_friendly_path(self, path):
         num_in_range_points = 0
@@ -549,6 +588,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             self.place_unit(EMP, attack_start, 100)
         elif num_affordable_emp >= 5:
             self.place_unit(EMP, attack_start, 100)
+            
+        return attack_start
 
     def tweaked_place_attackers(self):
         (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
