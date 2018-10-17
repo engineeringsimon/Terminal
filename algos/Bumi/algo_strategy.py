@@ -173,59 +173,23 @@ FFF.....................FD..
              X. 
 '''  
 
-# Bumi
-bumi_layout = '''
-FFF......G........G......FFF
- DFF.....G........G.....FFD 
-  ...D...G........G...D... 
-   ..E..DG........GD..E.. 
-    ....EG.D....D.GE.... 
-     ....G.E....E.G.... 
-      GGGG........GGGG 
-       SGG........GGS 
-        GG........GG 
+blank_layout = '''
+............................
+ .......................... 
+  ........................ 
+   ...................... 
+    .................... 
+     .................. 
+      ................ 
+       .............. 
+        ............ 
          .......... 
           ........ 
            ...... 
             .... 
-             XX 
-''' 
-
-# Bumi2
-bumi2_layout = '''
-FFF..........G...........FFF
- FFF.........G..........FFF 
-  FF........EG..........FF 
-   .........EG........... 
-    ..E..E..EG..E..E..E. 
-     .......EG......... 
-      .......G........ 
-       ......G....... 
-        .....G...... 
-         ....G..... 
-          GGGGGGGG 
-           ...... 
-            .... 
              .. 
 ''' 
 
-# Bumi3
-bumi3_layout = '''
-FF...........G............FF
- FF..........G...........FF 
-  FF.........G..........FF 
-   ...D..D..DGD..D..D.... 
-    ..E..E..EGE..E..E... 
-     ........G......... 
-      .......G........ 
-       ......G....... 
-        .....G...... 
-         ....G..... 
-          GGGGGGGG 
-           ...... 
-            .... 
-             .. 
-''' 
 
 # Bumi3
 adaptive_wall_layout = '''
@@ -263,6 +227,25 @@ FFFFFFFFFFFFFFFFFFFFFFFFFFFF
              .. 
 ''' 
 
+# Dumber wall
+dumber_wall_layout = '''
+............................
+ .......................... 
+  ........................ 
+   ......................
+    FFFFFFFFFFFFFFFFFFFF 
+     ..E............E.. 
+      ................ 
+       .............. 
+        ............ 
+         .......... 
+          ........ 
+           ...... 
+            .... 
+             .. 
+''' 
+
+
 
 '''
     Idea for stategy:
@@ -277,7 +260,7 @@ FFFFFFFFFFFFFFFFFFFFFFFFFFFF
 '''
 
    
-desired_layout = sneak_attack_layout   
+desired_layout = dumb_wall_layout   
 
 class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
@@ -445,11 +428,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences()
         
         if self.num_encrytors_placed * 2 >= self.num_destructors_placed:
-            self.place_destructors()
+            self.place_destructors(2)
             self.place_attackers()
         else:
             launch_loc = self.place_attackers()
-            self.place_encryptors(launch_loc)
+            self.place_encryptors(launch_loc, 1)
         
     
     def remove_gap_defenses(self):
@@ -478,8 +461,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         n = len(self.attack_paths)
         for i in range(n):
             (launch_loc, path) = self.attack_paths[i]
-            (in_range_count, is_successful) = self.eval_friendly_path(path)
-            self.attack_path_damage[i] = in_range_count
+            (damage_in_range, is_successful) = self.eval_friendly_path(path)
+            self.attack_path_damage[i] = damage_in_range
             
         self.best_attack_index_log.append(min(self.attack_path_damage, key=lambda i: self.attack_path_damage[i]))
         if len(self.best_attack_index_log) < 3:
@@ -543,7 +526,8 @@ class AlgoStrategy(gamelib.AlgoCore):
             if count >= max_num:
                 break
                 
-    def place_encryptors(self, launch_loc):
+    def place_encryptors(self, launch_loc, max_num=100):
+        num_placed = 0
         potential_paths = [path for path in self.friendly_paths if launch_loc in path]
         if len(potential_paths) == 0:
             self.place_destructors()
@@ -570,16 +554,24 @@ class AlgoStrategy(gamelib.AlgoCore):
         for loc, num_covered in evaluated_points:
             isOk = self.place_unit(ENCRYPTOR, loc)
             if not isOk:
-                break        
+                break    
+            num_placed += 1
             self.num_encrytors_placed += 1
+            if num_placed >= max_num:
+                break
     
     def eval_friendly_path(self, path):
-        num_in_range_points = 0
+        damage_in_range = 0
         for loc in path:
-            num_in_range_points += self.enemy_destructor_coverage.value((loc[0], loc[1]))
+            damage_in_range += self.enemy_destructor_coverage.value((loc[0], loc[1])) * 75
+            unit = self.game_state.contains_stationary_unit(loc)
+            if not unit: 
+                continue
+            if unit.unit_type == ENCRYPTOR or unit.unit_type == FILTER:
+                damage_in_range += unit.stability
 
         is_successful = path[-1] in self.enemy_edges
-        return (num_in_range_points, is_successful)
+        return (damage_in_range, is_successful)
         
     def place_attackers(self):
         # my_health = self.game_state.my_health
@@ -589,7 +581,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             # return
             
         (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
-        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
+        damage_in_range = self.attack_path_damage[self.min_attack_path_index]
         num_affordable_emp = self.game_state.number_affordable(EMP)
         
         edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
@@ -598,14 +590,18 @@ class AlgoStrategy(gamelib.AlgoCore):
         #else:
         #    attack_start = start_loc
         
-        if num_in_range_points <= 3:
-            self.place_unit(PING, attack_start, 100)
-        elif num_in_range_points < 30 and num_affordable_emp >= 2:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_in_range_points < 60 and num_affordable_emp >= 4:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_affordable_emp >= 5:
-            self.place_unit(EMP, attack_start, 100)
+        self.debug_print("Damage in Range = {}".format(damage_in_range))
+        
+        self.place_unit(PING, attack_start, 100)
+        
+        # if damage_in_range <= 100:
+            # self.place_unit(PING, attack_start, 100)
+        # elif damage_in_range < 1000 and num_affordable_emp >= 2:
+            # self.place_unit(EMP, attack_start, 100)
+        # elif damage_in_range < 2000 and num_affordable_emp >= 4:
+            # self.place_unit(EMP, attack_start, 100)
+        # elif num_affordable_emp >= 5:
+            # self.place_unit(EMP, attack_start, 100)
             
         return attack_start
 
@@ -690,7 +686,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
     def build_defences(self):
         locations = [(x, y) for (x, y) in self.desired_layout 
-                         if not self.game_state.contains_stationary_unit((x, y)) 
+                         if not self.game_state.contains_stationary_unit([x, y]) 
                             and [x, y] not in self.gap]
         random.shuffle(locations)
         locations.sort(key=lambda x: x[1], reverse=True)
