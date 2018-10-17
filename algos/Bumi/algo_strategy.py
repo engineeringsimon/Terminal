@@ -269,7 +269,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.turn_count = 0
         self.name = "Bumi"
         self.all_arena_locations = []
-        self.is_printing_debug = True
+        self.is_printing_debug = False
         
     def debug_print(self, str):
         if self.is_printing_debug:
