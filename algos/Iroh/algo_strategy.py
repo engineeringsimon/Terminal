@@ -103,14 +103,27 @@ class AlgoStrategy(gamelib.AlgoCore):
                 if self.game_state.game_map.in_arena_bounds(location):
                     self.my_side.append(location)
         
+        # initialise the probabilities from the data file
+        self.initialise_from_file()
+    
+    def initialise_from_file(self):
+        pass
+    
+    def execute_strategy(self):
+        self.place_defenders()
+        self.place_attackers()
+        
+    def place_defenders(self):
+        pass
+        
+    def place_attackers(self):
+        pass
+
     def mirror(self, loc):
         x = loc[0]
         y = loc[1]
         mirror_x = self.game_state.game_map.ARENA_SIZE - 1 - x
         return [mirror_x, y]
-        
-    def execute_strategy(self):
-        pass
         
     def all_valid_map_locations(self):
         all_locations = []
