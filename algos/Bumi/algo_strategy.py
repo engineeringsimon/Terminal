@@ -550,7 +550,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         potential_paths = [path for path in self.friendly_paths if launch_loc in path]
         if len(potential_paths) == 0:
             self.place_destructors()
-            
+            return
         path = potential_paths[0]
         
         # choose rows 8 and 9
