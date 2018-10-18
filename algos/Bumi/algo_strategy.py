@@ -269,7 +269,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.turn_count = 0
         self.name = "Bumi"
         self.all_arena_locations = []
-        self.is_printing_debug = False
+        self.is_printing_debug = True
         
     def debug_print(self, str):
         if self.is_printing_debug:
@@ -515,9 +515,15 @@ class AlgoStrategy(gamelib.AlgoCore):
     
     def place_destructors(self, max_num=100):
         potential_locations = self.enemy_path_hist.sorted_keys()
-        destructor_points = [x for x in potential_locations if [x[0], x[1]] in self.my_side and [x[0], x[1]] not in self.gap and x[1] >= 7]
+        destructor_points = [x for x in self.my_side 
+                                if [x[0], x[1]] not in self.gap 
+                                    and x[1] >= 7 
+                                    and not self.game_state.contains_stationary_unit(x)]
+                                    
+        coverage = [(loc, self.coverage_of(self.enemy_path_hist, loc)) for loc in destructor_points]
+        coverage.sort(key=lambda x: x[1], reverse=True)
         count = 0
-        for loc in destructor_points:
+        for (loc, coverage) in coverage:
             if self.game_state.contains_stationary_unit(loc):
                 continue
             isOk = self.place_unit(DESTRUCTOR, loc)
@@ -528,6 +534,17 @@ class AlgoStrategy(gamelib.AlgoCore):
             if count >= max_num:
                 break
                 
+    def coverage_of(self, histogram, loc):
+        x = loc[0]
+        y = loc[1]
+        covered_points = self.destructor_range_points[x, y]
+        sum = 0
+        for point in covered_points:
+            px = point[0]
+            py = point[1]
+            sum += histogram.value((px, py))
+        return sum
+        
     def place_encryptors(self, launch_loc, max_num=100):
         num_placed = 0
         potential_paths = [path for path in self.friendly_paths if launch_loc in path]
