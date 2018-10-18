@@ -43,6 +43,22 @@ class RandomStrategyData:
         self.likelihoods[DESTRUCTOR] = self.emp_likelihoods
         self.likelihoods[ENCRYPTOR] = self.encryptor_likelihoods
         
+        self.update_precalc()
+    
+    def mutate(self):
+        # vary each number using a normal distribution
+        std_dev = 0.02
+        maximum = 1.0
+        minimum = 0.0
+        for unit_type, likelihood_dict in self.likelihoods.items():
+            for loc, value in likelihood_dict.items():
+                likelihood_dict[loc] += random.normalvariate(0.0, std_dev)
+                if likelihood_dict[loc] > maximum:
+                    likelihood_dict[loc] = maximum
+                elif likelihood_dict[loc] < minimum:
+                    likelihood_dict[loc] = minimum
+    
+    def update_precalc(self):
         self.sums = {}
         for unit_type in self.likelihoods:
             self.sums[unit_type] = sum([self.likelihoods[unit_type][loc] for loc in self.likelihoods[unit_type]])

@@ -4,6 +4,7 @@ import math
 import warnings
 from sys import maxsize
 from RandomStrategyData import RandomStrategyData
+import pickle
 
 class PointHistogram:
     def __init__(self):
@@ -110,6 +111,9 @@ class AlgoStrategy(gamelib.AlgoCore):
     def initialise_from_file(self):
         self.strategy = RandomStrategyData(self.my_side, self.friendly_edge_locations, self.config)
         self.strategy.randomise()
+        
+        with open("baseStrategy.pickle", 'wb') as f:
+            pickle.dump(self.strategy, f)
     
     def execute_strategy(self):
         self.place_defenders()
