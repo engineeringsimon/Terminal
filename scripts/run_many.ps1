@@ -2,7 +2,7 @@ $player = "Bumi"
 $opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku")
 #$opponents = @("Dragon", "SkyBison", "Moon", "JongJong", "Gyatso")
 $wins = @()
-$numMatches = 5
+$numMatches = 3
 
 foreach ($opponent in $opponents)
 {

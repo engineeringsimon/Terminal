@@ -515,9 +515,11 @@ class AlgoStrategy(gamelib.AlgoCore):
     
     def place_destructors(self, max_num=100):
         potential_locations = self.enemy_path_hist.sorted_keys()
-        destructor_points = [x for x in potential_locations if [x[0], x[1]] in self.my_side and [x[0], x[1]] not in self.gap]
+        destructor_points = [x for x in potential_locations if [x[0], x[1]] in self.my_side and [x[0], x[1]] not in self.gap and x[1] >= 7]
         count = 0
         for loc in destructor_points:
+            if self.game_state.contains_stationary_unit(loc):
+                continue
             isOk = self.place_unit(DESTRUCTOR, loc)
             if not isOk:
                 break
@@ -543,6 +545,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         evaluated_points = []                                        
         
         for loc in potential_locations:
+            if self.game_state.contains_stationary_unit(loc):
+                continue
             x = loc[0]
             y = loc[1]
             # calc coverage of encryptor at loc for the path points
@@ -550,7 +554,7 @@ class AlgoStrategy(gamelib.AlgoCore):
             covered_path_points = [loc for loc in path if loc in covered_points]
             evaluated_points.append((loc, len(covered_path_points)))
             
-        evaluated_points.sort(key=lambda x: x[1], reverse=True)
+        evaluated_points.sort(key=lambda x: x[1] + x[0][1]*0.01, reverse=True)
         for loc, num_covered in evaluated_points:
             isOk = self.place_unit(ENCRYPTOR, loc)
             if not isOk:
@@ -592,7 +596,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         self.debug_print("Damage in Range = {}".format(damage_in_range))
         
-        self.place_unit(PING, attack_start, 100)
+        self.place_unit(EMP, attack_start, 100)
         
         # if damage_in_range <= 100:
             # self.place_unit(PING, attack_start, 100)
@@ -604,48 +608,6 @@ class AlgoStrategy(gamelib.AlgoCore):
             # self.place_unit(EMP, attack_start, 100)
             
         return attack_start
-
-    def tweaked_place_attackers(self):
-        (start_loc, attack_path) = self.attack_paths[self.min_attack_path_index]
-        num_in_range_points = self.attack_path_damage[self.min_attack_path_index]
-        num_affordable_emp = self.game_state.number_affordable(EMP)
-        
-        edge_points = [[x, y] for (x, y) in attack_path if [x, y] in self.friendly_edge_locations]
-        if len(edge_points) > 0:
-            attack_start = min(edge_points, key=lambda loc: abs(start_loc[0] - loc[0]) + abs(start_loc[1] - loc[1]))
-        else:
-            attack_start = start_loc
-        attack_start = start_loc
-        if num_in_range_points <= 3:
-            n = self.game_state.number_affordable(PING)
-            self.place_unit(PING, attack_start, 100)
-        elif num_in_range_points < 30 and num_affordable_emp >= 2:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_in_range_points < 60 and num_affordable_emp >= 4:
-            self.place_unit(EMP, attack_start, 100)
-        elif num_affordable_emp >= 5:
-            self.place_unit(EMP, attack_start, 100)
-
-
-    
-    def old_place_attackers(self):
-        path_info = [(self.eval_friendly_path(x), x[0]) for x in self.friendly_paths]
-        path_info.sort(key=lambda x: x[0][0])
-        num_in_range_points = path_info[0][0][0]
-        is_successful = path_info[0][0][1]
-        loc = path_info[0][1]
-        
-        current_bits = self.game_state.get_resource(self.game_state.BITS, 0)
-        num_affordable_emp = self.game_state.number_affordable(EMP)
-        
-        if num_in_range_points <= 2 and is_successful:
-            self.place_unit(PING, loc, 100)
-        elif num_in_range_points < 30 and num_affordable_emp >= 2:
-            self.place_unit(EMP, loc, 100)
-        elif num_in_range_points < 60 and num_affordable_emp >= 4:
-            self.place_unit(EMP, loc, 100)
-        elif num_affordable_emp >= 5:
-            self.place_unit(EMP, loc, 100)
         
     def enemy_destructor_locations(self):
         locations = []
