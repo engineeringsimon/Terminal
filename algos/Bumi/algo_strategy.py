@@ -428,11 +428,11 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.build_defences()
         
         if self.num_encrytors_placed * 1 >= self.num_destructors_placed:
-            self.place_destructors(2)
+            self.place_destructors(100)
             self.place_attackers()
         else:
             launch_loc = self.place_attackers()
-            self.place_encryptors(launch_loc, 1)
+            self.place_encryptors(launch_loc, 100)
         
     
     def remove_gap_defenses(self):
