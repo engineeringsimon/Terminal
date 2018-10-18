@@ -3,6 +3,7 @@ import random
 import math
 import warnings
 from sys import maxsize
+from RandomStrategyData import RandomStrategyData
 
 class PointHistogram:
     def __init__(self):
@@ -107,7 +108,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.initialise_from_file()
     
     def initialise_from_file(self):
-        pass
+        self.strategy = RandomStrategyData(self.my_side, self.friendly_edge_locations, self.config)
+        self.strategy.randomise()
     
     def execute_strategy(self):
         self.place_defenders()
@@ -115,7 +117,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
     def place_defenders(self):
         for i in range(100):
-            (location, unit_type) = self.choose_defence_move()
+            (location, unit_type) = self.strategy.choose_defence_move()
             if self.game_state.contains_stationary_unit(location):
                 continue
             isOk = self.place_unit(unit_type, location)
@@ -124,22 +126,13 @@ class AlgoStrategy(gamelib.AlgoCore):
         
     def place_attackers(self):
         for i in range(100):
-            (location, unit_type) = self.choose_attack_move()
+            (location, unit_type) = self.strategy.choose_attack_move()
             if self.game_state.contains_stationary_unit(location):
                 continue
             isOk = self.place_unit(unit_type, location)
             if not isOk:
                 break
-            
-    def choose_defence_move(self):
-        location = random.choice(self.my_side)
-        unit_type = random.choice([FILTER, DESTRUCTOR, ENCRYPTOR])
-        return (location, unit_type)
-        
-    def choose_attack_move(self):
-        location = random.choice(self.friendly_edge_locations)
-        unit_type = random.choice([EMP, PING, SCRAMBLER])
-        return (location, unit_type)
+       
         
     def place_unit(self, unit_type, location, num=1):
         number_placed = 0
