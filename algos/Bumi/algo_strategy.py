@@ -427,7 +427,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.remove_gap_defenses()
         self.build_defences()
         
-        if self.num_encrytors_placed * 2 >= self.num_destructors_placed:
+        if self.num_encrytors_placed * 1 >= self.num_destructors_placed:
             self.place_destructors(2)
             self.place_attackers()
         else:
