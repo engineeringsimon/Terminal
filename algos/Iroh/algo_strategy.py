@@ -114,11 +114,46 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.place_attackers()
         
     def place_defenders(self):
-        pass
+        for i in range(100):
+            (location, unit_type) = self.choose_defence_move()
+            if self.game_state.contains_stationary_unit(location):
+                continue
+            isOk = self.place_unit(unit_type, location)
+            if not isOk:
+                break
         
     def place_attackers(self):
-        pass
-
+        for i in range(100):
+            (location, unit_type) = self.choose_attack_move()
+            if self.game_state.contains_stationary_unit(location):
+                continue
+            isOk = self.place_unit(unit_type, location)
+            if not isOk:
+                break
+            
+    def choose_defence_move(self):
+        location = random.choice(self.my_side)
+        unit_type = random.choice([FILTER, DESTRUCTOR, ENCRYPTOR])
+        return (location, unit_type)
+        
+    def choose_attack_move(self):
+        location = random.choice(self.friendly_edge_locations)
+        unit_type = random.choice([EMP, PING, SCRAMBLER])
+        return (location, unit_type)
+        
+    def place_unit(self, unit_type, location, num=1):
+        number_placed = 0
+        while number_placed < num:
+            if self.game_state.number_affordable(unit_type) > 0:
+                if self.game_state.can_spawn(unit_type, location):
+                    self.game_state.attempt_spawn(unit_type, location)  
+                    number_placed += 1
+                else:
+                    break
+            else:
+                break
+        return number_placed > 0
+        
     def mirror(self, loc):
         x = loc[0]
         y = loc[1]
