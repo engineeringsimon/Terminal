@@ -5,6 +5,9 @@ class RandomStrategyData:
     def __init__(self, my_side, friendly_edge_locations, config):
         self.friendly_edge_locations = friendly_edge_locations
         self.my_side = my_side
+        self.init_config(config)
+        
+    def init_config(self, config):
         self.config = config
         global FILTER, ENCRYPTOR, DESTRUCTOR, PING, EMP, SCRAMBLER
         FILTER = config["unitInformation"][0]["shorthand"]
@@ -13,6 +16,7 @@ class RandomStrategyData:
         PING = config["unitInformation"][3]["shorthand"]
         EMP = config["unitInformation"][4]["shorthand"]
         SCRAMBLER = config["unitInformation"][5]["shorthand"]
+        
         
     def randomise(self):
         self.filter_likelihoods = {}
