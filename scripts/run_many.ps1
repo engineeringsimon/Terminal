@@ -17,7 +17,7 @@ foreach ($opponent in $opponents)
         # $algo1
         # $algo2
         
-        java -jar engine.jar work $algo1 $algo2 > $outputFilename
+        java -jar engine.jar work $algo1 $algo2 | Tee-Object -file $outputFilename
         
         $fileContent = Get-Content -Path $outputFilename
         foreach ($line in $fileContent)
