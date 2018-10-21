@@ -118,8 +118,19 @@ while ($iteration -lt 1000000)
     "Playing round " + $iteration + " with temperature " + $temperature
     $time = Measure-Command { Play-A-Round }
     $roundsPerHour = [math]::Floor(3600.0 / $time.TotalSeconds)
-    "Round " + $iteration + " took " + $time.TotalSeconds "s, which is " + $roundsPerHour + " rounds per hour."
+    "Round " + $iteration + " took " + $time.TotalSeconds + "s, which is " + $roundsPerHour + " rounds per hour."
+    
+    if ($iteration % 100 -eq 0)
+    {
+        $destFilename = $playerDirectory1 + "\baseStrategy{0, 5:d5}.pickle" -f $iteration
+        Copy-Item $base1 -Destination $destFilename
+        
+        $backToBaseFilename = $sourceDirectory + "\" + "\baseStrategy{0, 5:d5}.pickle" -f $iteration
+        Copy-Item $base1 -Destination $backToBaseFilename
+    }
+    
     $temperature *= $tempChangeRatio
+    
     $iteration += 1
 }
 
