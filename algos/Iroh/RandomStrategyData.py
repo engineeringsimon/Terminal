@@ -44,7 +44,7 @@ class RandomStrategyData:
         self.likelihoods[EMP] = self.emp_likelihoods
         self.likelihoods[SCRAMBLER] = self.scrambler_likelihoods
         self.likelihoods[FILTER] = self.filter_likelihoods
-        self.likelihoods[DESTRUCTOR] = self.emp_likelihoods
+        self.likelihoods[DESTRUCTOR] = self.destructor_likelihoods
         self.likelihoods[ENCRYPTOR] = self.encryptor_likelihoods
         
         self.update_precalc()
@@ -84,7 +84,7 @@ class RandomStrategyData:
             return self.choose_cumulative_item(ENCRYPTOR, x - self.sums[FILTER])
         else:
             # choose a destructor location
-            return self.choose_cumulative_item(ENCRYPTOR, x - self.sums[FILTER] - self.sums[ENCRYPTOR])
+            return self.choose_cumulative_item(DESTRUCTOR, x - self.sums[FILTER] - self.sums[ENCRYPTOR])
         
     def choose_attack_move(self):
         x = random.random() * self.attack_sum
