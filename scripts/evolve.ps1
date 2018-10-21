@@ -1,10 +1,11 @@
 param (
-    [string]$player = "Iroh"
+    [string]$player = "Iroh",
+    [int]$iteration = 0
     )
     
 $sourceDirectory = ".\algos\" + $player
-$playerDirectory1 = ".\evolve\p1" 
-$playerDirectory2 = ".\evolve\p2"
+$playerDirectory1 = ".\evolve\p1" + $player 
+$playerDirectory2 = ".\evolve\p2" + $player
 $baseFilename = "baseStrategy.pickle"
 $mutatedFilename = "mutatedStrategy.pickle"
 
@@ -19,7 +20,7 @@ $tempChangeRatio = 1.0 - ($tempChangePercent_per_turn / 100)
 
 function Play-And-Return-Winner
 {
-    $outputFilename = "latestMatch.txt"
+    $outputFilename = "latestMatch" + $player + ".txt"
     $algo1 = $playerDirectory1 + "\run.ps1"
     $algo2 = $playerDirectory2 + "\run.ps1"
     java -jar engine.jar work $algo1 $algo2 > $outputFilename
@@ -110,13 +111,13 @@ function Play-A-Round
 #   otherwise: player 2 baseStrategy becomes player 1 mutatedStrategy
 
 Copy-Program-If-Needed
-$i = 0
-while ($i -lt 1000000)
+
+while ($iteration -lt 1000000)
 {
-    "Playing round " + $i + " with temperature " + $temperature
+    "Playing round " + $iteration + " with temperature " + $temperature
     Play-A-Round
     $temperature *= $tempChangeRatio
-    $i += 1
+    $iteration += 1
 }
 
 

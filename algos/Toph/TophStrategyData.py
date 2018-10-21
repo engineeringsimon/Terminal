@@ -75,6 +75,19 @@ def layout_from_string(layout_string, my_side):
             desired_layout[x, y] = my_unit_code[character]
     return desired_layout
     
+def random_defender():
+    return random.choice([FILTER, ENCRYPTOR, DESTRUCTOR])
+
+def surrounding_locations(location_tuple, radius=1):
+    (x, y) = location_tuple
+    locations = []
+    for i in range(x - radius, x + radius + 1):
+        for j in range(y - radius, y + radius + 1):
+            if i == x and j == y:
+                continue
+            locations.append((i, j))
+    return locations
+    
 class TophStrategyData:
     def __init__(self, my_side, friendly_edge_locations):
         self.friendly_edge_locations = friendly_edge_locations
@@ -84,7 +97,55 @@ class TophStrategyData:
         self.desired_layout = layout_from_string(desired_layout_str, self.my_side)
     
     def mutate(self):
-        pass
-      
+        '''
+            The following methods of mutation can be used on the layout:
+            Addition of a new unit
+            Deletion of an existing unit
+            Move an existing unit to an adjacent point
+            Morph a unit type
+            
+            Note that this is for defense only right now
+        '''
+        ADD = 0
+        DELETE = 1
+        MOVE = 2
+        MORPH = 3
+        
+        mutation_type = random.choice([ADD, DELETE, MOVE, MORPH])
+        if mutation_type == ADD:
+            self.add_random_defender()
+        elif mutation_type == DELETE:
+            self.remove_random_defender()
+        elif mutation_type == MOVE:
+            self.move_random_defender()
+        else:
+            self.morph_random_defender()
+        
+    def add_random_defender(self):
+        available_locations = [(loc[0], loc[1]) for loc in self.my_side if (loc[0], loc[1]) not in self.desired_layout]
+        location = random.choice(available_locations)
+        unit_type = random_defender()
+        self.desired_layout[location] = unit_type
 
-    
+    def remove_random_defender(self):
+        occupied_locations = [loc for loc in self.desired_layout.keys()]
+        location = random.choice(occupied_locations)
+        self.desired_layout.pop(location)
+        
+    def move_random_defender(self):
+        occupied_locations = [loc for loc in self.desired_layout.keys()]
+        start_location = random.choice(occupied_locations)
+        surrounding_loc = surrounding_locations(start_location)
+        avail_surr_loc = [loc for loc in surrounding_loc if [loc[0], loc[1]] in self.my_side]
+        if len(avail_surr_loc) == 0:
+            return
+        end_location = random.choice(avail_surr_loc)
+        self.desired_layout[end_location] = self.desired_layout[start_location]
+        self.desired_layout.pop(start_location)
+        
+    def morph_random_defender(self):
+        occupied_locations = [loc for loc in self.desired_layout.keys()]
+        location = random.choice(occupied_locations)
+        old_defender = self.desired_layout[location]
+        while self.desired_layout[location] == old_defender:
+            self.desired_layout[location] = random_defender()

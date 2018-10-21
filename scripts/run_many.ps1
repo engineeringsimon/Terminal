@@ -1,8 +1,8 @@
 param (
-    [int]$NumMatches = 3
+    [int]$NumMatches = 3,
+    [string]$player = "Iroh"
 )
 
-$player = "Iroh"
 $opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku", "Bumi")
 #$opponents = @("Dragon", "SkyBison", "Moon", "JongJong", "Gyatso", "Bumi")
 $wins = @()
