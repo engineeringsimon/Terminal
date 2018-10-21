@@ -3,7 +3,7 @@ param (
     [string]$player = "Iroh"
 )
 
-$opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku", "Bumi")
+$opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku", "Bumi", "Iroh", "Toph")
 #$opponents = @("Dragon", "SkyBison", "Moon", "JongJong", "Gyatso", "Bumi")
 $wins = @()
 $numMatches = $NumMatches
@@ -13,6 +13,10 @@ foreach ($opponent in $opponents)
     $numWins = 0
     for($i = 0; $i -lt $numMatches; $i++)
     {
+        if ($player -eq $opponent)
+        {
+            continue
+        }
         $outputFilename = $player + "_" + $opponent + "_" + $i + ".txt"
         $algo1 = ".\algos\" + $player + "\run.ps1"
         $algo2 = ".\algos\" + $opponent + "\run.ps1"
@@ -21,7 +25,7 @@ foreach ($opponent in $opponents)
         # $algo1
         # $algo2
         
-        java -jar engine.jar work $algo1 $algo2 | Tee-Object -file $outputFilename
+        java -jar engine.jar work $algo1 $algo2 | Tee-Object -file $outputFilename | Select-String -Pattern "SAPlayer 1.*"
         
         $fileContent = Get-Content -Path $outputFilename
         foreach ($line in $fileContent)
@@ -44,6 +48,10 @@ foreach ($opponent in $opponents)
 
 for ($i = 0; $i -lt $opponents.Length; $i++)
 {
-    $player + " vs. " + $opponents[$i] + " => " + $wins[$i] + " / " + $numMatches
+        if ($player -eq $opponents[$i])
+        {
+            continue
+        }
+        $player + " vs. " + $opponents[$i] + " => " + $wins[$i] + " / " + $numMatches
 }
 

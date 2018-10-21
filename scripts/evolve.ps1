@@ -46,7 +46,7 @@ function Play-And-Return-Winner
 function Change-To-New-Program
 {
     Copy-Item $base2 -Destination $base1
-    "New program " + $base1 + " => " + $base1
+    "New program " + $base2 + " => " + $base1
     Copy-Item $mutated2 -Destination $base2
     "New mutation " + $mutated2 + " => " + $base2
 }
@@ -71,7 +71,8 @@ function Copy-Program-If-Needed
 function Play-A-Round
 {
     $winner = Play-And-Return-Winner
-
+    
+    "."
     "Winner is player " + $winner
 
     if ($winner -eq 2)
@@ -115,7 +116,9 @@ Copy-Program-If-Needed
 while ($iteration -lt 1000000)
 {
     "Playing round " + $iteration + " with temperature " + $temperature
-    Play-A-Round
+    $time = Measure-Command { Play-A-Round }
+    $roundsPerHour = [math]::Floor(3600.0 / $time.TotalSeconds)
+    "Round " + $iteration + " took " + $time.TotalSeconds "s, which is " + $roundsPerHour + " rounds per hour."
     $temperature *= $tempChangeRatio
     $iteration += 1
 }
