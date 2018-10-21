@@ -5,6 +5,9 @@ class RandomStrategyData:
     def __init__(self, my_side, friendly_edge_locations, config):
         self.friendly_edge_locations = friendly_edge_locations
         self.my_side = my_side
+        self.init_config(config)
+        
+    def init_config(self, config):
         self.config = config
         global FILTER, ENCRYPTOR, DESTRUCTOR, PING, EMP, SCRAMBLER
         FILTER = config["unitInformation"][0]["shorthand"]
@@ -13,6 +16,7 @@ class RandomStrategyData:
         PING = config["unitInformation"][3]["shorthand"]
         EMP = config["unitInformation"][4]["shorthand"]
         SCRAMBLER = config["unitInformation"][5]["shorthand"]
+        
         
     def randomise(self):
         self.filter_likelihoods = {}
@@ -40,7 +44,7 @@ class RandomStrategyData:
         self.likelihoods[EMP] = self.emp_likelihoods
         self.likelihoods[SCRAMBLER] = self.scrambler_likelihoods
         self.likelihoods[FILTER] = self.filter_likelihoods
-        self.likelihoods[DESTRUCTOR] = self.emp_likelihoods
+        self.likelihoods[DESTRUCTOR] = self.destructor_likelihoods
         self.likelihoods[ENCRYPTOR] = self.encryptor_likelihoods
         
         self.update_precalc()
@@ -80,7 +84,7 @@ class RandomStrategyData:
             return self.choose_cumulative_item(ENCRYPTOR, x - self.sums[FILTER])
         else:
             # choose a destructor location
-            return self.choose_cumulative_item(ENCRYPTOR, x - self.sums[FILTER] - self.sums[ENCRYPTOR])
+            return self.choose_cumulative_item(DESTRUCTOR, x - self.sums[FILTER] - self.sums[ENCRYPTOR])
         
     def choose_attack_move(self):
         x = random.random() * self.attack_sum

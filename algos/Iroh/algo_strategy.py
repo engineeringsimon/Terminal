@@ -5,6 +5,8 @@ import warnings
 from sys import maxsize
 from RandomStrategyData import RandomStrategyData
 import pickle
+import os
+import copy
 
 class PointHistogram:
     def __init__(self):
@@ -36,6 +38,12 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.all_arena_locations = []
         self.is_printing_debug = True
         
+        self.local_path = os.path.dirname(os.path.realpath(__file__))
+        self.base_strategy_filename = "baseStrategy.pickle"
+        self.mutated_strategy_filename = "mutatedStrategy.pickle"
+        self.base_strategy_path = os.path.join(self.local_path, self.base_strategy_filename)
+        self.mutated_strategy_path = os.path.join(self.local_path, self.mutated_strategy_filename)
+
     def debug_print(self, str):
         if self.is_printing_debug:
             gamelib.debug_write(str)
@@ -109,10 +117,19 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.initialise_from_file()
     
     def initialise_from_file(self):
-        self.strategy = RandomStrategyData(self.my_side, self.friendly_edge_locations, self.config)
-        self.strategy.randomise()
-        
-        with open("baseStrategy.pickle", 'wb') as f:
+        if os.path.exists(self.base_strategy_path):
+            with open(self.base_strategy_path, 'rb') as f:
+                self.strategy = pickle.load(f)
+            self.strategy.init_config(self.config)
+        else:
+            self.strategy = RandomStrategyData(self.my_side, self.friendly_edge_locations, self.config)
+            self.strategy.randomise()
+            with open(self.base_strategy_path, 'wb') as f:
+                pickle.dump(self.strategy, f)
+                
+        self.mutated_strategy = copy.deepcopy(self.strategy)
+        self.mutated_strategy.mutate()
+        with open(self.mutated_strategy_path, 'wb') as f:
             pickle.dump(self.strategy, f)
     
     def execute_strategy(self):

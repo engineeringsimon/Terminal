@@ -2,7 +2,7 @@ $player = "Bumi"
 $opponents = @("starter-algo", "BadgerMole", "Dragon", "SkyBison", "Moon", "Boulder", "JongJong", "Gyatso", "Paku", "Iroh")
 #$opponents = @("Dragon", "SkyBison", "Moon", "JongJong", "Gyatso", "Bumi")
 $wins = @()
-$numMatches = 2
+$numMatches = 3
 
 foreach ($opponent in $opponents)
 {
@@ -17,7 +17,7 @@ foreach ($opponent in $opponents)
         # $algo1
         # $algo2
         
-        java -jar engine.jar work $algo1 $algo2 > $outputFilename
+        java -jar engine.jar work $algo1 $algo2 | Tee-Object -file $outputFilename
         
         $fileContent = Get-Content -Path $outputFilename
         foreach ($line in $fileContent)
