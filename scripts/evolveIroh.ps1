@@ -1,7 +1,4 @@
-param (
-    [string]$player = "Iroh"
-    )
-    
+$player = "Iroh"
 $sourceDirectory = ".\algos\" + $player
 $playerDirectory1 = ".\evolve\p1" 
 $playerDirectory2 = ".\evolve\p2"

@@ -130,7 +130,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.mutated_strategy = copy.deepcopy(self.strategy)
         self.mutated_strategy.mutate()
         with open(self.mutated_strategy_path, 'wb') as f:
-            pickle.dump(self.strategy, f)
+            pickle.dump(self.mutated_strategy, f)
     
     def execute_strategy(self):
         self.place_defenders()
