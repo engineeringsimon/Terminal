@@ -95,7 +95,20 @@ class SokkaStrategyData:
         
     def randomise(self):
         self.desired_layout = layout_from_string(desired_layout_str, self.my_side)
-    
+        self.attack_params = {
+                "Ping Rush Damage": 100,
+                "Basic EMP Damage": 1000,
+                "Basic EMP Num": 2,
+                "Moderate EMP Damage": 2000,
+                "Moderate EMP Num": 4
+            }
+        self.attack_params_range = {
+                "Ping Rush Damage": (0, 10000),
+                "Basic EMP Damage": (0, 10000),
+                "Basic EMP Num": (1, 100),
+                "Moderate EMP Damage": (0, 10000),
+                "Moderate EMP Num": (1, 100)
+            }
     def mutate(self):
         '''
             The following methods of mutation can be used on the layout:
@@ -120,6 +133,18 @@ class SokkaStrategyData:
             self.move_random_defender()
         else:
             self.morph_random_defender()
+            
+        for key in self.attack_params_range:
+            (minimum, maximum) = self.attack_params_range[key]
+            if "Num" in key:
+                new_value = self.attack_params[key] + random.choice([-1, 1])
+            else:
+                new_value = self.attack_params[key] * random.lognormvariate(0.0, 0.02) # near 1.0
+            if new_value < minimum:
+                new_value = minimum
+            elif new_value > maximum:
+                new_value = maximum
+            self.attack_params[key] = new_value
         
     def add_random_defender(self):
         available_locations = [(loc[0], loc[1]) for loc in self.my_side if (loc[0], loc[1]) not in self.desired_layout]

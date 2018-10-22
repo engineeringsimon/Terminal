@@ -403,16 +403,16 @@ class AlgoStrategy(gamelib.AlgoCore):
         
         self.debug_print("Damage in Range = {}".format(damage_in_range))
         
-        self.place_unit(EMP, attack_start, 100)
+        attack_params = self.strategy.attack_params
         
-        # if damage_in_range <= 100:
-            # self.place_unit(PING, attack_start, 100)
-        # elif damage_in_range < 1000 and num_affordable_emp >= 2:
-            # self.place_unit(EMP, attack_start, 100)
-        # elif damage_in_range < 2000 and num_affordable_emp >= 4:
-            # self.place_unit(EMP, attack_start, 100)
-        # elif num_affordable_emp >= 5:
-            # self.place_unit(EMP, attack_start, 100)
+        if damage_in_range <= attack_params["Ping Rush Damage"]:
+            self.place_unit(PING, attack_start, 100)
+        elif damage_in_range < attack_params["Basic EMP Damage"] and num_affordable_emp >= attack_params["Basic EMP Num"]:
+            self.place_unit(EMP, attack_start, 100)
+        elif damage_in_range < attack_params["Moderate EMP Damage"] and num_affordable_emp >= attack_params["Moderate EMP Num"]:
+            self.place_unit(EMP, attack_start, 100)
+        elif num_affordable_emp >= (attack_params["Moderate EMP Num"] + 1):
+            self.place_unit(EMP, attack_start, 100)
             
         return attack_start
         
