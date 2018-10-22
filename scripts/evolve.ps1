@@ -14,8 +14,8 @@ $base1 = $playerDirectory1 + "\" + $baseFilename
 $mutated2 = $playerDirectory2 + "\" + $mutatedFilename
 $mutated1 = $playerDirectory1 + "\" + $mutatedFilename
 
-$temperature = 0.3
-$tempChangePercent_per_turn = 0.05
+$temperature = 0.02
+$tempChangePercent_per_turn = 0.1
 $tempChangeRatio = 1.0 - ($tempChangePercent_per_turn / 100)
 
 function Play-And-Return-Winner
