@@ -4,6 +4,8 @@ import os
 import copy
 import pickle
 
+from ReducedGameState import *
+
 local_path = os.path.dirname(os.path.realpath(__file__))
 base_strategy_filename = "baseStrategy.pickle"
 mutated_strategy_filename = "mutatedStrategy.pickle"
@@ -43,7 +45,7 @@ def Make(my_side, friendly_edge_locations):
         with open(base_strategy_path, 'rb') as f:
             strategy = pickle.load(f)
     else:
-        strategy = SokkaStrategyData(my_side, friendly_edge_locations)
+        strategy = KataraStrategyData(my_side, friendly_edge_locations)
         strategy.randomise()
         with open(base_strategy_path, 'wb') as f:
             pickle.dump(strategy, f)
@@ -88,10 +90,16 @@ def surrounding_locations(location_tuple, radius=1):
             locations.append((i, j))
     return locations
     
-class SokkaStrategyData:
+class KataraStrategyData:
     def __init__(self, my_side, friendly_edge_locations):
         self.friendly_edge_locations = friendly_edge_locations
         self.my_side = my_side
+        
+    def next_defence_move(self, state): # ReducedGameState
+        pass
+    
+    def next_attack_move(self, state): 
+        pass
         
     def randomise(self):
         self.desired_layout = layout_from_string(desired_layout_str, self.my_side)
