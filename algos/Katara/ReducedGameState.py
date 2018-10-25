@@ -9,3 +9,6 @@ class ReducedGameState:
         self.enemy_cores = game_state.get_resource(game_state.CORES, 1)
         self.my_bits = game_state.get_resource(game_state.BITS, 0)
         self.enemy_bits = game_state.get_resource(game_state.BITS, 1)
+        
+    def float_array(self):
+        return [0.0, 0.0]

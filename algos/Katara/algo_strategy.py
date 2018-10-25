@@ -6,6 +6,8 @@ from sys import maxsize
 import KataraStrategyData
 
 from ReducedGameState import *
+import NeuralNetwork
+
 
 class PointHistogram:
     def __init__(self):
@@ -141,12 +143,12 @@ class AlgoStrategy(gamelib.AlgoCore):
                 break
     
     def execute_defence_move(self, move):
-        # move in format (unit_type, (x, y))
-        pass
+        (unit_type, (x, y)) = move
+        self.place_unit(unit_type, [x, y])
         
     def execute_attack_move(self, move):
-        # move in format (unit_type, (x, y))
-        pass
+        (unit_type, (x, y)) = move
+        self.place_unit(unit_type, [x, y])
      
     def is_destructor_at_loc(self, loc):
         units = self.game_state.game_map[loc[0], loc[1]]
@@ -162,7 +164,6 @@ class AlgoStrategy(gamelib.AlgoCore):
                 if self.game_state.can_spawn(unit_type, location):
                     self.game_state.attempt_spawn(unit_type, location)  
                     number_placed += 1
-                    self.placement_hist.add((location[0], location[1]), 1)
                 else:
                     break
             else:
