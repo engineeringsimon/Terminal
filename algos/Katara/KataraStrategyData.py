@@ -63,12 +63,10 @@ class KataraStrategyData:
         self.output_state = OutputState(self.outputs)
         
     def next_defence_move(self, state): # ReducedGameState
-        (unit_type, (x, y)) = self.output_state.best_defence_move(state.occupied_locations)
-        return (unit_type, (x, y))
+        return self.output_state.best_defence_move(state.occupied_locations)
     
     def next_attack_move(self, state): 
-        (unit_type, (x, y)) = self.output_state.best_attack_move(state.occupied_locations)
-        return (unit_type, (x, y))
+        return self.output_state.best_attack_move(state.occupied_locations)
         
     def randomise(self):
         self.neural_network.randomise()

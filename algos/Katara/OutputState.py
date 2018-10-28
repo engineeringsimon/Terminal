@@ -67,6 +67,8 @@ class OutputState:
                                 for (unit_type, (x, y), value) in self.defence_moves 
                                 if (x, y) not in occupied_locations]
         
+        if len(avail_moves) == 0:
+            return None
         best = max(avail_moves, key=lambda x: x[2])
         (unit_type, (x, y), value) = best
         #gamelib.debug_write("Defence {}".format(best))
@@ -76,7 +78,8 @@ class OutputState:
         avail_moves = [(unit_type, (x, y), value) 
                         for (unit_type, (x, y), value) in self.attack_moves 
                         if (x, y) not in occupied_locations]
-        
+        if len(avail_moves) == 0:
+            return None
         best = max(avail_moves, key=lambda x: x[2])
         (unit_type, (x, y), value) = best
         #gamelib.debug_write("Attack {}".format(best))
