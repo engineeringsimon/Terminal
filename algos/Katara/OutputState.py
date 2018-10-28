@@ -74,7 +74,7 @@ class OutputState:
         
     def best_attack_move(self, occupied_locations):
         avail_moves = [(unit_type, (x, y), value) 
-                        for (unit_type, (x, y), value) in self.defence_moves 
+                        for (unit_type, (x, y), value) in self.attack_moves 
                         if (x, y) not in occupied_locations]
         
         best = max(avail_moves, key=lambda x: x[2])
