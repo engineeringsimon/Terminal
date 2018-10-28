@@ -57,20 +57,17 @@ class KataraStrategyData:
         # list of numbers is the number of neurons at each layer, length of array is number of layers.
         self.neural_network = NeuralNetwork.FeedforwardNetwork(layers = layer_sizes)
         
-    def next_defence_move(self, state): # ReducedGameState
-        state_float_array = state.float_array()
-        outputs = self.neural_network.calculate_output(state_float_array)
+    def update(self, state):
+        self.state_float_array = state.float_array()
+        self.outputs = self.neural_network.calculate_output(self.state_float_array)
+        self.output_state = OutputState(self.outputs)
         
-        # covert outputs to an actual best move
-        output_state = OutputState(outputs)
-        (unit_type, (x, y)) = output_state.best_defence_move(state.occupied_locations)
+    def next_defence_move(self, state): # ReducedGameState
+        (unit_type, (x, y)) = self.output_state.best_defence_move(state.occupied_locations)
         return (unit_type, (x, y))
     
     def next_attack_move(self, state): 
-        state_float_array = state.float_array()
-        outputs = self.neural_network.calculate_output(state_float_array)
-        output_state = OutputState(outputs)
-        (unit_type, (x, y)) = output_state.best_attack_move(state.occupied_locations)
+        (unit_type, (x, y)) = self.output_state.best_attack_move(state.occupied_locations)
         return (unit_type, (x, y))
         
     def randomise(self):

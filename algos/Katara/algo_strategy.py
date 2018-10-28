@@ -112,6 +112,9 @@ class AlgoStrategy(gamelib.AlgoCore):
         self.strategy = KataraStrategyData.Make(self.my_side, self.friendly_edge_locations)
        
     def execute_strategy(self):
+        state = ReducedGameState(self.game_state)
+        self.strategy.update(state)
+        
         for i in range(100):
             # Get Game State: Map, health of both, resources of both, round that we are up to
             state = ReducedGameState(self.game_state)
