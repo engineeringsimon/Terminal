@@ -157,18 +157,10 @@ class AlgoStrategy(gamelib.AlgoCore):
         unit = units[0]
         return unit.unit_type == DESTRUCTOR
         
-    def place_unit(self, unit_type, location, num=1):
-        number_placed = 0
-        while number_placed < num:
-            if self.game_state.number_affordable(unit_type) > 0:
-                if self.game_state.can_spawn(unit_type, location):
-                    self.game_state.attempt_spawn(unit_type, location)  
-                    number_placed += 1
-                else:
-                    break
-            else:
-                break
-        return number_placed > 0
+    def place_unit(self, unit_type, location):
+        if self.game_state.number_affordable(unit_type) > 0:
+            if self.game_state.can_spawn(unit_type, location):
+                self.game_state.attempt_spawn(unit_type, location)  
     
     def all_valid_map_locations(self):
         all_locations = []

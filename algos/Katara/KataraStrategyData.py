@@ -5,6 +5,7 @@ import copy
 import pickle
 
 from ReducedGameState import *
+from OutputState import *
 import NeuralNetwork
 
 
@@ -44,26 +45,33 @@ class KataraStrategyData:
     def __init__(self, my_side, friendly_edge_locations):
         self.friendly_edge_locations = friendly_edge_locations
         self.my_side = my_side
+        self.input_size = input_size()
+        self.num_hidden_layers = 2
+        self.hidden_layer_size = 32
+        self.output_size = output_size()
+        
+        layer_sizes = [self.input_size]
+        layer_sizes += [self.hidden_layer_size] * self.num_hidden_layers
+        layer_sizes += [self.output_size]
         
         # list of numbers is the number of neurons at each layer, length of array is number of layers.
-        self.neural_network = NeuralNetwork.FeedforwardNetwork(layers = [10, 10, 10, 10, 10, 10, 10, 10])
+        self.neural_network = NeuralNetwork.FeedforwardNetwork(layers = layer_sizes)
         
     def next_defence_move(self, state): # ReducedGameState
         state_float_array = state.float_array()
         outputs = self.neural_network.calculate_output(state_float_array)
+        
         # covert outputs to an actual best move
-        # one of the possible moves needs to be do nothing
-        # perhaps ensure that we choose the best move that doesn't have a piece there already.
-        
-        # possibile moves should be to remove units too, if there is one there.
-        
-        # do nothing
-        return None
+        output_state = OutputState(outputs)
+        (unit_type, (x, y)) = output_state.best_defence_move()
+        return (unit_type, (x, y))
     
     def next_attack_move(self, state): 
         state_float_array = state.float_array()
         outputs = self.neural_network.calculate_output(state_float_array)
-        return None # Do nothing
+        output_state = OutputState(outputs)
+        (unit_type, (x, y)) = output_state.best_attack_move()
+        return (unit_type, (x, y))
         
     def randomise(self):
         self.neural_network.randomise()
