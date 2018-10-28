@@ -63,14 +63,14 @@ class KataraStrategyData:
         
         # covert outputs to an actual best move
         output_state = OutputState(outputs)
-        (unit_type, (x, y)) = output_state.best_defence_move()
+        (unit_type, (x, y)) = output_state.best_defence_move(state.occupied_locations)
         return (unit_type, (x, y))
     
     def next_attack_move(self, state): 
         state_float_array = state.float_array()
         outputs = self.neural_network.calculate_output(state_float_array)
         output_state = OutputState(outputs)
-        (unit_type, (x, y)) = output_state.best_attack_move()
+        (unit_type, (x, y)) = output_state.best_attack_move(state.occupied_locations)
         return (unit_type, (x, y))
         
     def randomise(self):

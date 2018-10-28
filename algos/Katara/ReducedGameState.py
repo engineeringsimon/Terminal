@@ -60,6 +60,13 @@ class ReducedGameState:
         self.enemy_cores = game_state.get_resource(game_state.CORES, 1)
         self.my_bits = game_state.get_resource(game_state.BITS, 0)
         self.enemy_bits = game_state.get_resource(game_state.BITS, 1)
+        self.occupied_locations = []
+        for x in range(ARENA_SIZE):
+            for y in range(ARENA_SIZE):
+                if in_arena_bounds(x, y):
+                    units = self.map[x, y]
+                    if units and len(units) > 0:
+                        self.occupied_locations.append((x, y))
         
     def float_array(self):
         # for each field point Destructor, Encryptor, Filter

@@ -161,7 +161,8 @@ class AlgoStrategy(gamelib.AlgoCore):
         if self.game_state.number_affordable(unit_type) > 0:
             if self.game_state.can_spawn(unit_type, location):
                 self.game_state.attempt_spawn(unit_type, location)  
-    
+                #print("Placing {} at {}".format(unit_type, location))
+                
     def all_valid_map_locations(self):
         all_locations = []
         for i in range(self.game_state.ARENA_SIZE):

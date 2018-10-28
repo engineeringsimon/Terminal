@@ -1,5 +1,5 @@
 import ReducedGameState
-
+import gamelib
 
 ARENA_SIZE = 28
 HALF_ARENA = 14
@@ -62,12 +62,22 @@ class OutputState:
             
         self.size = i   
     
-    def best_defence_move(self):
-        best = max(self.defence_moves, key=lambda x: x[2])
+    def best_defence_move(self, occupied_locations):
+        avail_moves = [(unit_type, (x, y), value) 
+                                for (unit_type, (x, y), value) in self.defence_moves 
+                                if (x, y) not in occupied_locations]
+        
+        best = max(avail_moves, key=lambda x: x[2])
         (unit_type, (x, y), value) = best
+        #gamelib.debug_write("Defence {}".format(best))
         return (unit_type, (x, y))
         
-    def best_attack_move(self):
-        best = max(self.attack_moves, key=lambda x: x[2])
+    def best_attack_move(self, occupied_locations):
+        avail_moves = [(unit_type, (x, y), value) 
+                        for (unit_type, (x, y), value) in self.defence_moves 
+                        if (x, y) not in occupied_locations]
+        
+        best = max(avail_moves, key=lambda x: x[2])
         (unit_type, (x, y), value) = best
+        #gamelib.debug_write("Attack {}".format(best))
         return (unit_type, (x, y))        
