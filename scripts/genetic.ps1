@@ -116,10 +116,14 @@ function Select-Best
                 "deleting player 2"
                 $loser = $p2
             }
-            else
+            elseif ($winner -eq 2)
             {
                 "deleting player 1"
                 $loser = $p1
+            }
+            else
+            {
+                break
             }
             Remove-Item -Path $loser -Recurse
         }
@@ -150,7 +154,11 @@ function Repopulate
             $basePath = $dest + "\" + $baseFilename
             $offspringPath = $dest + "\" + $offspringBase + "{0, 1:d2}.pickle" -f $i
             Remove-Item -Path $basePath
-            Copy-Item  $offspringPath -Destination $basePath 
+            $random_var = Get-Random -Minimum 0.0 -Maximum 1.0
+            if ($random_var -lt 0.95)
+            {
+                Copy-Item  $offspringPath -Destination $basePath 
+            }
             
             $n++
             if ($n -ge $PopulationSize)
