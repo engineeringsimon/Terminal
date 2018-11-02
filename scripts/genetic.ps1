@@ -89,6 +89,33 @@ function Play-And-Return-Winner
     return 0
 }
 
+function Play-Match
+{
+    param(
+        [string]$p1,
+        [string]$p2
+        )
+        "Play " + $p1 + " vs. " + $p2
+        $winnerIndex = Play-And-Return-Winner $p1 $p2
+        "Winner is " + $winnerIndex
+        if ($winnerIndex -eq 1)
+        {
+            "deleting player 2"
+            $loser = $p2
+        }
+        elseif ($winnerIndex -eq 2)
+        {
+            "deleting player 1"
+            $loser = $p1
+        }
+        else
+        {
+            return
+        }
+        
+        Remove-Item -Path $loser -Recurse
+}
+
 function Select-Best
 {
     # Grab a list of all the folders starting with the player name
@@ -101,6 +128,7 @@ function Select-Best
     # continue
     while ($individuals.length -ge (2 * $SelectionSize))
     {
+        Get-Job | Remove-Job
         $i = 0
         while ($i -lt $individuals.length)
         {
@@ -108,21 +136,32 @@ function Select-Best
             $i++
             $p2 = $playDirectory + $individuals[$i].name
             $i++
-            "Play " + $p1 + " vs. " + $p2
-            $winnerIndex = Play-And-Return-Winner $p1 $p2
-            "Winner is " + $winnerIndex
-            if ($winnerIndex -eq 1)
-            {
-                "deleting player 2"
-                $loser = $p2
-            }
-            else
-            {
-                "deleting player 1"
-                $loser = $p1
-            }
-            Remove-Item -Path $loser -Recurse
+            $jobName = "Match" + $i
+            
+            Start-Job -Name $jobName -FilePath ".\scripts\Play-Match.ps1" -ArgumentList $p1, $p2
+            
+            # "Play " + $p1 + " vs. " + $p2
+            # $winnerIndex = Play-And-Return-Winner $p1 $p2
+            # "Winner is " + $winnerIndex
+            # if ($winnerIndex -eq 1)
+            # {
+                # "deleting player 2"
+                # $loser = $p2
+            # }
+            # elseif ($winnerIndex -eq 2)
+            # {
+                # "deleting player 1"
+                # $loser = $p1
+            # }
+            # else
+            # {
+                # break
+            # }
+            
+            # Remove-Item -Path $loser -Recurse
         }
+        Get-Job | Wait-Job | Receive-Job
+        "Round Played"
         $individuals = Get-ChildItem -Path ($playDirectory + "*") | Sort-Object {Get-Random}
     }
 }
