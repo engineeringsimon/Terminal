@@ -125,7 +125,7 @@ while ($iteration -lt 1000000)
         $destFilename = $playerDirectory1 + "\baseStrategy{0, 5:d5}.pickle" -f $iteration
         Copy-Item $base1 -Destination $destFilename
         
-        $backToBaseFilename = $sourceDirectory + "\" + "\baseStrategy{0, 5:d5}.pickle" -f $iteration
+        $backToBaseFilename = $sourceDirectory + "\" + "baseStrategy{0, 5:d5}.pickle" -f $iteration
         Copy-Item $base1 -Destination $backToBaseFilename
     }
     

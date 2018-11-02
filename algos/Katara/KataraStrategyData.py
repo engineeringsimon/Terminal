@@ -12,8 +12,8 @@ import NeuralNetwork
 local_path = os.path.dirname(os.path.realpath(__file__))
 base_strategy_filename = "baseStrategy.pickle"
 mutated_strategy_filename = "mutatedStrategy.pickle"
+offspring_base = "offspring"
 base_strategy_path = os.path.join(local_path, base_strategy_filename)
-mutated_strategy_path = os.path.join(local_path, mutated_strategy_filename)
 ARENA_SIZE = 28
 HALF_ARENA = 14
 FILTER = "FF"
@@ -22,6 +22,8 @@ DESTRUCTOR = "DF"
 PING = "PI"
 EMP = "EI"
 SCRAMBLER = "SI"
+
+NUM_OFFSPRING = 8
         
 
 def Make(my_side, friendly_edge_locations):
@@ -34,12 +36,20 @@ def Make(my_side, friendly_edge_locations):
         with open(base_strategy_path, 'wb') as f:
             pickle.dump(strategy, f)
             
+    save_mutated_strategy(strategy, mutated_strategy_filename)
+        
+    for i in range(NUM_OFFSPRING):
+        offspring_filename = "{}{:02d}.pickle".format(offspring_base, i)
+        save_mutated_strategy(strategy, offspring_filename)
+    
+    return strategy
+    
+def save_mutated_strategy(strategy, filename):
+    mutated_strategy_path = os.path.join(local_path, filename)
     mutated_strategy = copy.deepcopy(strategy)
     mutated_strategy.mutate()
     with open(mutated_strategy_path, 'wb') as f:
-        pickle.dump(mutated_strategy, f)
-    
-    return strategy
+        pickle.dump(mutated_strategy, f)    
     
 class KataraStrategyData:
     def __init__(self, my_side, friendly_edge_locations):
