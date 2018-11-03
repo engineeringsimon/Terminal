@@ -23,7 +23,7 @@ PING = "PI"
 EMP = "EI"
 SCRAMBLER = "SI"
 
-NUM_OFFSPRING = 8
+NUM_OFFSPRING = 10
         
 
 def Make(my_side, friendly_edge_locations):
