@@ -11,8 +11,8 @@ import random
 # Dumb wall
 dumb_wall_layout = '''
 FFFFFFFFFFFFFFFFFFFFFFFFF.FF
- .......................... 
-  D...EDEDEDEDEDEDEDEDEDDD 
+ D........................D 
+  DEE.EDEDEDEDEDEDEDEDEDDD 
    ......................
     .................... 
      .................. 
@@ -80,6 +80,7 @@ class UnitPattern:
         # order is by y coordinate + random number in range +/- 1
         locations = [x for x in self.g.units.keys()]
         locations.sort(key=lambda x: x[1] + random.uniform(-1.0, 1.0), reverse=True)
+        #random.shuffle(locations)
         return locations
     
     def unit_type_at(self, loc):
