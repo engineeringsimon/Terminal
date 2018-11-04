@@ -50,23 +50,48 @@ class LookaheadStrategy:
         
     
     def _execute_strategy(self):
-        launch_locations = random.sample(gs.my_edge_points, 5)
-        for loc in launch_locations:
-            self.place_single_unit(gs.SCRAMBLER, loc)
+        self.place_defenders_in_pattern()
+        isOk = True
+        while isOk:
+            isOk = self.place_single_unit(gs.EMP, (25, 11))
+        
+        g = gs.GameState()
+        g.init_from_game(self.game_state)
+        self.debug_print(g)
 
-#        g = gs.GameState()
-#        g.init_from_game(self.game_state)
+
+    def place_defenders_in_pattern(self):
+        locations = self.desired_unit_pattern.unit_locations()
+        for (x, y) in locations:
+            if not self.game_state.contains_stationary_unit([x, y]):
+                unit_type = self.desired_unit_pattern.unit_type_at((x, y))
+                self.debug_print(unit_type)
+                isOk = self.place_single_unit(unit_type, (x, y))
+                if not isOk:
+                    return
+        
     
     def place_single_unit(self, unit_type, location):
+        (x, y) = location
+        location = [x, y]
+        #self.debug_print("Placing {} @ {}".format(unit_type, location))
         if self.game_state.number_affordable(unit_type) > 0:
             if self.game_state.can_spawn(unit_type, location):
                 self.game_state.attempt_spawn(unit_type, location)  
+                #self.debug_print("Ok")
                 return True
+            else:
+                #self.debug_print("Can't spawn")
+                pass
+        else:
+            #self.debug_print("Can't afford")
+            pass
+        #self.debug_print("Fail")
         return False
-            
-    def num_bits(self):
-        return self.game_state.get_resource(self.game_state.BITS)
-    
-    def num_cores(self):
-        return self.game_state.get_resource(self.game_state.CORES)
+#            
+#    def num_bits(self):
+#        return self.game_state.get_resource(self.game_state.BITS)
+#    
+#    def num_cores(self):
+#        return self.game_state.get_resource(self.game_state.CORES)
     

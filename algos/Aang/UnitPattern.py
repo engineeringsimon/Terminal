@@ -5,16 +5,16 @@ Created on Sun Nov  4 14:04:33 2018
 @author: user
 """
 
-import MyGameState as gs
 import random
+import MyGameState as gs
 
 # Dumb wall
 dumb_wall_layout = '''
-FFFFFFFFFFFFFFFFFFFFFFFFF.FF
- D........................D 
-  DEE.EDEDEDEDEDEDEDEDEDDD 
-   ......................
-    .................... 
+..FFFFFFFFFFFFFFFFFFFFFFFFFF
+ ..DDDEDEDEDEDEDEDEDEDEDDDD 
+  ........................ 
+   ..EEEEEEEEE...........
+    ..EEEE.............. 
      .................. 
       ................ 
        .............. 
@@ -25,20 +25,6 @@ FFFFFFFFFFFFFFFFFFFFFFFFF.FF
             .... 
              .. 
 ''' 
-
-unit_code = {
-            'D': gs.DESTRUCTOR,
-            'F': gs.FILTER,
-            'E': gs.ENCRYPTOR,
-            'X': gs.EMP,
-            'P': gs.PING,
-            'S': gs.SCRAMBLER
-            }
-
-reverse_unit_code = {}
-for character in unit_code:
-    reverse_unit_code[unit_code[character]] = character
-
 
 class UnitPattern:
     def __init__(self):
@@ -54,8 +40,8 @@ class UnitPattern:
             if character == "G":
                 self.gap.append(loc)
                 continue
-            if character in unit_code:
-                self.g.add_unit((x, y), unit_code[character])   
+            if character in gs.unit_code:
+                self.g.add_unit((x, y), gs.unit_code[character])   
                 
     def __repr__(self):
         lines = []
@@ -69,7 +55,7 @@ class UnitPattern:
                     elif unit == None:
                         line += "."
                     else:
-                        line += reverse_unit_code[unit.type]
+                        line += gs.reverse_unit_code[unit.type]
                 else:
                     line += " "
             lines.append(line)
@@ -84,9 +70,7 @@ class UnitPattern:
         return locations
     
     def unit_type_at(self, loc):
-        if loc in self.g.units:
-            return self.g.units[loc].type
-        return None
+        return self.g.unit_at(loc).type
     
 if __name__ == "__main__":
     u = UnitPattern()
