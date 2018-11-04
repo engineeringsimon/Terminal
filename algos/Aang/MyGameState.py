@@ -120,7 +120,7 @@ CORE_INCREMENT_PER_TURN = 4
 class Unit:
     def __init__(self, unit_type):
         self.type = unit_type
-        self.damage = unit_stability[unit_type]
+        self.stability = unit_stability[unit_type]
 
 class GameState:
     def __init__(self):
@@ -135,3 +135,8 @@ class GameState:
         
         self.units[location] = Unit(unit_type)
         return True
+    
+    def unit_at(self, location):
+        if location in self.units:
+            return self.units[location]
+        return None

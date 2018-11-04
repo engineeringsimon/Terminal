@@ -57,6 +57,9 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(self.g.units), 1)
         unit = self.g.units[location]
         self.assertEqual(unit.type, unit_type) 
+        u = self.g.unit_at(location)
+        self.assertEqual(unit.type, u.type)
+        self.assertEqual(unit.stability, u.stability)
         
         isOk = self.g.add_unit(location, unit_type)
         self.assertFalse(isOk)        
