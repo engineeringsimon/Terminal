@@ -14,3 +14,5 @@ algos/Sokka/baseStrategy4*.pickle
 genetic_Katara/
 *.7z
 pgenetic_Katara/
+algos/Katara/mutatedStrategy.pickle
+algos/Katara/offspring*.pickle
