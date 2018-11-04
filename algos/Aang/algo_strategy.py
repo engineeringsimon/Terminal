@@ -4,7 +4,7 @@ import math
 import warnings
 from sys import maxsize
 import MyGameState as gs
-from UnitPattern import UnitPattern
+from LookaheadStrategy import LookaheadStrategy
 
 """
 Most of the algo code you write will be in this file unless you create new
@@ -27,10 +27,10 @@ class AlgoStrategy(gamelib.AlgoCore):
     def __init__(self):
         super().__init__()
         random.seed()
-        self.turn_count = 0
         self.name = "Aang"
         self.is_printing_debug = True
-        self.desired_unit_pattern = UnitPattern()
+        self.strategy = LookaheadStrategy(self)
+        self.register_spawn_callback(self.strategy.register_spawn)
 
     def debug_print(self, str):
         if self.is_printing_debug:
@@ -50,7 +50,6 @@ class AlgoStrategy(gamelib.AlgoCore):
         EMP = config["unitInformation"][4]["shorthand"]
         SCRAMBLER = config["unitInformation"][5]["shorthand"]
         
-        self.turn_count = 0
 
     def on_turn(self, turn_state):
         """
@@ -60,60 +59,16 @@ class AlgoStrategy(gamelib.AlgoCore):
         unit deployments, and transmitting your intended deployments to the
         game engine.
         """
-        self.turn_count += 1
-        
         self.game_state = gamelib.AdvancedGameState(self.config, turn_state)
         gamelib.debug_write('Performing turn {} of the {} strategy'.format(self.game_state.turn_number, 
                                 self.name))
         #game_state.suppress_warnings(True)  #Uncomment this line to suppress warnings.
 
-        if (self.turn_count == 1):
-            self.execute_first_turn()
-
-        self.execute_strategy()
+        self.strategy.execute(self.game_state)
 
         self.print_map()
         self.game_state.submit_turn()
         
-    def execute_first_turn(self):
-        self.debug_print(self.desired_unit_pattern)
-        
-    def execute_strategy(self):
-        self.place_defenders()
-        self.place_unit(EMP, [3,10], 4)
-        self.place_unit(SCRAMBLER, [13,0], 100) 
-
-    def place_defenders(self):
-        sorted_unit_locations = self.desired_unit_pattern.unit_locations()
-        for loc in sorted_unit_locations:
-            if not self.game_state.contains_stationary_unit(loc):
-                desired_unit_type = self.desired_unit_pattern.unit_type_at(loc)
-                assert desired_unit_type
-                isOk = self.place_single_unit(desired_unit_type, loc)
-                if not isOk:
-                    return
-
-    def place_single_unit(self, unit_type, location):
-        if self.game_state.number_affordable(unit_type) > 0:
-            if self.game_state.can_spawn(unit_type, location):
-                self.game_state.attempt_spawn(unit_type, location)  
-                return True
-        return False
-
-
-            
-    def place_unit(self, unit_type, location, num=1):
-        number_placed = 0
-        while number_placed < num:
-            if self.game_state.number_affordable(unit_type) > 0:
-                if self.game_state.can_spawn(unit_type, location):
-                    self.game_state.attempt_spawn(unit_type, location)  
-                    number_placed += 1
-                else:
-                    return
-            else:
-                return
-            
     def print_map(self):
         unit_character = {
                 PING: 'P',

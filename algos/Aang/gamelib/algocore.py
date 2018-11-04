@@ -3,6 +3,8 @@ import json
 from .game_state import GameState
 from .util import get_command, debug_write, BANNER_TEXT, send_command
 
+import MyGameState as gs
+
 class AlgoCore(object):
     """This class handles communication with the game itself. Your strategy should subclass it.
 
@@ -30,6 +32,9 @@ class AlgoCore(object):
     def submit_default_turn(self):
         send_command("")
         send_command("")
+        
+    def register_spawn_callback(self, fcn):
+        self.register_spawn_event = fcn
 
     # only override this function if you have a 
     def start(self):
@@ -62,7 +67,23 @@ class AlgoCore(object):
                 elif stateType == 1:
                     """
                     If stateType == 1, this game_state_string string represents the results of an action phase
+                    
+                    Unit ids:
+                        0=Filter
+                        1=Encryptor
+                        2=Destructor
+                        3=Ping
+                        4=EMP,
+                        5=Scrambler
+                        6=Remove
                     """
+                    a = state['events']['spawn']
+                    if len(a) > 0:
+                        debug_write("Spawn:")
+                        for b in a:
+                            s = gs.SpawnEvent(b)
+                            self.register_spawn_event(s)
+
                     continue
                 elif stateType == 2:
                     """

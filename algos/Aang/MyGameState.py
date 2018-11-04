@@ -140,3 +140,50 @@ class GameState:
         if location in self.units:
             return self.units[location]
         return None
+
+unit_names = {
+        PING: "Ping", 
+        EMP: "EMP",
+        SCRAMBLER: "Scrambler",
+        FILTER: "Filter",
+        ENCRYPTOR: "Encryptor",
+        DESTRUCTOR: "Destructor"
+        } 
+    
+class SpawnEvent:
+    def __init__(self, event):
+        self.loc = event[0]
+        self.unit_id = event[1]
+        self.id_str = event[2]
+        self.player_id = event[3]
+        self.x = self.loc[0]
+        self.y = self.loc[1]
+        self.location = (self.x, self.y)
+        self.unit_codes = {
+                              0: FILTER,
+                              1: ENCRYPTOR,
+                              2: DESTRUCTOR,
+                              3: PING,
+                              4: EMP,
+                              5: SCRAMBLER,
+                              6: "Remove"
+                        }
+    def name(self):
+        code = self.unit_codes[self.unit_id]
+        if code in unit_names:
+            return unit_names[code]
+        return code
+    
+    def is_attacker(self):
+        return self.unit_id in [3,4,5]
+    
+    def unit_type(self):
+        return self.unit_codes[self.unit_id]
+        
+    def __repr__(self):
+        return "Player {}: {} @ {}".format(self.player_id, 
+                       self.name(), 
+                       self.location)
+
+
+
