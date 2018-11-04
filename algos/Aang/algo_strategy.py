@@ -80,7 +80,7 @@ class AlgoStrategy(gamelib.AlgoCore):
         
     def execute_strategy(self):
         self.place_defenders()
-        self.place_unit(EMP, [10, 3], 4)
+        self.place_unit(EMP, [1, 12], 4)
         self.place_unit(SCRAMBLER, [13,0], 100) 
 
     def place_defenders(self):
