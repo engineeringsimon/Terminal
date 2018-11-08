@@ -53,7 +53,10 @@ class LookaheadStrategy:
         self.place_defenders_in_pattern()
         isOk = True
         while isOk:
-            isOk = self.place_single_unit(gs.EMP, (25, 11))
+            lower_edge_points = [(x,y) for (x,y) in gs.my_edge_points if y < 6]
+            loc = random.choice(lower_edge_points)
+            unit_type = random.choice([gs.PING, gs.EMP, gs.SCRAMBLER])
+            isOk = self.place_single_unit(unit_type, loc)
         
         g = gs.GameState()
         g.init_from_game(self.game_state)
